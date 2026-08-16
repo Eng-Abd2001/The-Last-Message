@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>المحقق داخل الهاتف</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- شاشة التحميل -->
+    <div id="loading-screen">
+        <div class="loader"></div>
+        <h1>المحقق داخل الهاتف</h1>
+        <p>جاري تحميل النظام...</p>
+    </div>
+
+    <!-- حاوية اللعبة -->
+    <div id="game-container">
+        <!-- الهاتف -->
+        <div id="phone">
+            <!-- شريط الحالة -->
+            <div id="status-bar">
+                <span id="clock">12:00</span>
+                <div class="status-icons">
+                    <span>📶</span>
+                    <span>🔋 85%</span>
+                </div>
+            </div>
+
+            <!-- شاشة القفل -->
+            <div id="lock-screen" class="screen active">
+                <h1 id="lock-time">12:00</h1>
+                <p id="lock-date">الجمعة، 15 أكتوبر</p>
+                <div class="swipe-up-text">اسحب للأعلى لفتح الهاتف ⬆️</div>
+            </div>
+
+            <!-- الشاشة الرئيسية (التطبيقات) -->
+            <div id="home-screen" class="screen hidden">
+                <div class="apps-grid">
+                    <div class="app-icon" data-app="messages">
+                        <div class="icon-bg" style="background: #25D366;">💬</div>
+                        <span>الرسائل</span>
+                    </div>
+                    <div class="app-icon" data-app="gallery">
+                        <div class="icon-bg" style="background: #FF2D55;">🖼️</div>
+                        <span>الصور</span>
+                    </div>
+                    <div class="app-icon" data-app="notes">
+                        <div class="icon-bg" style="background: #FFD60A;">📝</div>
+                        <span>الملاحظات</span>
+                    </div>
+                    <div class="app-icon" data-app="files">
+                        <div class="icon-bg" style="background: #007AFF;">📁</div>
+                        <span>الملفات</span>
+                    </div>
+                    <div class="app-icon" data-app="calls">
+                        <div class="icon-bg" style="background: #34C759;">📞</div>
+                        <span>المكالمات</span>
+                    </div>
+                    <div class="app-icon" data-app="browser">
+                        <div class="icon-bg" style="background: #5856D6;">🌐</div>
+                        <span>المتصفح</span>
+                    </div>
+                    <div class="app-icon" data-app="evidence">
+                        <div class="icon-bg" style="background: #FF9500;">🔍</div>
+                        <span>الأدلة</span>
+                    </div>
+                    <div class="app-icon" data-app="analysis">
+                        <div class="icon-bg" style="background: #AF52DE;">⚖️</div>
+                        <span>التحليل</span>
+                    </div>
+                </div>
+                
+                <div class="player-stats">
+                    المستوى: <span id="player-level">1</span> | نقاط الخبرة: <span id="player-xp">0</span>
+                </div>
+            </div>
+
+            <!-- حاوية التطبيق المفتوح -->
+            <div id="app-container" class="screen hidden">
+                <div id="app-header">
+                    <button id="home-btn">◀ رجوع</button>
+                    <h2 id="app-title">اسم التطبيق</h2>
+                </div>
+                <div id="app-content">
+                    <!-- يتم حقن محتوى التطبيقات هنا عبر JS -->
+                </div>
+            </div>
+
+            <!-- إشعارات الأدلة -->
+            <div id="notification" class="hidden">
+                <div class="notif-icon">❗️</div>
+                <div class="notif-text">
+                    <h4>دليل جديد!</h4>
+                    <p id="notif-desc">تم العثور على رسالة مشبوهة.</p>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- نافذة النهاية -->
+    <div id="ending-modal" class="hidden">
+        <div class="modal-content">
+            <h1 id="ending-title">النهاية</h1>
+            <p id="ending-desc">وصف النهاية يظهر هنا.</p>
+            <button id="restart-btn">إعادة القضية</button>
+        </div>
+    </div>
+
+    <!-- الملفات البرمجية -->
+    <script src="cases.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
