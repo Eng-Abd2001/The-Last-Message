@@ -11,9 +11,12 @@
         <!-- Pattern Overlay -->
         <div class="bg-pattern"></div>
 
-        <!-- Sound Toggle (Fixed Position to avoid overlap) -->
+        <!-- Fixed Sound Toggle (Top Left - Safe Zone) -->
         <button id="sound-toggle" aria-label="تبديل الصوت">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
         </button>
 
         <!-- UI Overlays -->
@@ -24,7 +27,7 @@
         <div id="file-modal" class="modal">
             <div class="modal-content">
                 <button class="close-btn" onclick="closeModal('file-modal')">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
                 <div class="modal-header-visual">
                     <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
@@ -53,11 +56,11 @@
                 <p class="cinematic-desc">في أروقة هذه المحكمة، الحقيقة لا تُمنح... بل تُنتزع. جهّز أدلتك، فلا مجال للخطأ هنا.</p>
                 <div class="action-buttons">
                     <button class="gold-btn full-width" onclick="startGame()">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                         <span>دخول المحكمة</span>
                     </button>
                     <button class="outline-btn full-width mt-15" onclick="showScreen('stats-screen')">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
                         <span>السجل الجنائي والإحصائيات</span>
                     </button>
                 </div>
@@ -67,10 +70,12 @@
         <!-- Screen 2: Stats & Progress -->
         <div id="stats-screen" class="screen">
             <div class="screen-header">
-                <h2>السجل المهني</h2>
-                <button class="icon-only-btn outline-icon" onclick="showScreen('start-screen')">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                </button>
+                <div class="header-group">
+                    <button class="icon-only-btn outline-icon" onclick="showScreen('start-screen')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                    <h2>السجل المهني</h2>
+                </div>
             </div>
             <div class="scrollable-content">
                 <div class="stats-grid" id="stats-grid"></div>
@@ -80,7 +85,7 @@
             </div>
             <div class="bottom-action">
                 <button class="gold-btn full-width" id="share-btn" onclick="shareStats()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
                     <span>مشاركة السجل</span>
                 </button>
             </div>
@@ -89,10 +94,12 @@
         <!-- Screen 3: Cases List -->
         <div id="cases-screen" class="screen">
             <div class="screen-header">
-                <h2>ملفات التحقيق</h2>
-                <button class="icon-only-btn outline-icon" onclick="showScreen('start-screen')">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                </button>
+                <div class="header-group">
+                    <button class="icon-only-btn outline-icon" onclick="showScreen('start-screen')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                    <h2>ملفات التحقيق</h2>
+                </div>
             </div>
             <div class="scrollable-content cases-container" id="cases-container"></div>
         </div>
@@ -100,11 +107,13 @@
         <!-- Screen 4: Investigation Phase -->
         <div id="investigation-screen" class="screen">
             <div class="screen-header">
-                <h2 id="inv-case-title" class="truncate">القضية</h2>
-                <button class="outline-btn small-btn" onclick="openFileModal()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
-                    <span>تفاصيل الملف</span>
-                </button>
+                <div class="header-group">
+                    <button class="icon-only-btn outline-icon" onclick="showScreen('cases-screen')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                    <h2 id="inv-case-title" class="truncate">القضية</h2>
+                </div>
+                <button class="outline-btn small-btn" onclick="openFileModal()" style="padding: 6px 10px;">الملف</button>
             </div>
             
             <div class="investigation-wrapper">
@@ -137,11 +146,25 @@
 
             <div class="court-stage">
                 <div class="character-box judge">
-                    <div class="avatar-img"><svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
+                    <div class="avatar-img">
+                        <!-- Professional Gavel SVG -->
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 14L9 19l-4-4 5-5"></path>
+                            <path d="M16 6l2 2-4 4-2-2 4-4z"></path>
+                            <path d="M17 7l3-3a1.4 1.4 0 0 0-2-2l-3 3"></path>
+                            <path d="M4 22h16"></path>
+                        </svg>
+                    </div>
                     <div class="name">سيادة القاضي</div>
                 </div>
                 <div class="character-box witness">
-                    <div class="avatar-img witness-color"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+                    <div class="avatar-img witness-color">
+                        <!-- Professional Silhouette SVG -->
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
                     <div class="name" id="witness-name">الشاهد / الخصم</div>
                 </div>
             </div>
@@ -153,10 +176,8 @@
                     <h3 class="mb-10 text-center gold-text text-spacing">قدم دليلاً يدحض هذا الإدعاء</h3>
                     <div class="court-evidence-chips" id="court-evidence-tray"></div>
                 </div>
-                <button class="outline-btn full-width mt-10" id="next-dialogue-btn" onclick="nextCourtStep()">
-                    <span>متابعة الاستجواب</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                </button>
+                <!-- Manual progression button -->
+                <button class="outline-btn full-width mt-10" id="next-dialogue-btn"></button>
             </div>
         </div>
 

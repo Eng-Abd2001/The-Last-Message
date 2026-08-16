@@ -1,6 +1,6 @@
 /**
- * The Last Argument - Premium Narrative Logic
- * Highly professional detective narrative, strictly logical cases, and tailored themes.
+ * The Last Argument - Premium Narrative & Manual Progression
+ * Highly professional detective narrative with manual reading pace control.
  */
 
 const ALL_CASES = [
@@ -199,15 +199,15 @@ function playSound(type) {
 document.getElementById('sound-toggle').addEventListener('click', () => {
     soundEnabled = !soundEnabled;
     const btn = document.getElementById('sound-toggle');
-    btn.innerHTML = soundEnabled ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>` : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`;
+    btn.innerHTML = soundEnabled ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>` : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`;
 });
 
 function saveGame() {
-    try { localStorage.setItem('lastArgument_Pro', JSON.stringify({ unlockedCases: state.unlockedCases, solvedCases: state.solvedCases, stats: state.stats, achievements: state.achievements })); } catch(e) {}
+    try { localStorage.setItem('lastArgument_Elite', JSON.stringify({ unlockedCases: state.unlockedCases, solvedCases: state.solvedCases, stats: state.stats, achievements: state.achievements })); } catch(e) {}
 }
 function loadGame() {
     try {
-        const saved = localStorage.getItem('lastArgument_Pro');
+        const saved = localStorage.getItem('lastArgument_Elite');
         if(saved) {
             const p = JSON.parse(saved);
             state.unlockedCases = p.unlockedCases || 1; state.solvedCases = p.solvedCases || []; state.stats = p.stats || { wins: 0, losses: 0, perfectCases: 0 }; state.achievements = p.achievements || [];
@@ -348,6 +348,7 @@ function processCourtDialogue() {
     
     if(!step) { startFinalArgument(); return; }
     state.isProcessingLogic = false;
+    
     if(step.type === 'present') {
         nextBtn.classList.add('hidden'); presentAction.classList.remove('hidden');
         appendChat('judge', 'سيادة القاضي', 'هل يمتلك الدفاع دليلاً قاطعاً يكشف التناقض الجنائي في هذه الشهادة؟');
@@ -356,6 +357,9 @@ function processCourtDialogue() {
         const isJudge = step.speaker === 'judge';
         appendChat(isJudge ? 'judge' : 'witness', isJudge ? 'سيادة القاضي' : 'الشاهد / الخصم', step.text);
         playSound('click');
+        
+        nextBtn.innerHTML = `<span>متابعة الاستجواب</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
+        nextBtn.onclick = nextCourtStep;
     }
 }
 
@@ -368,19 +372,43 @@ function presentEvidence(ev) {
     if(state.isProcessingLogic) return; state.isProcessingLogic = true;
     const c = ALL_CASES.find(x => x.id === state.currentCaseId);
     const step = c.courtScript[state.courtStepIndex];
+    
     document.getElementById('court-present-action').classList.add('hidden');
+    const nextBtn = document.getElementById('next-dialogue-btn');
+    const box = document.getElementById('dialogue-box');
     
     if(ev.id === step.correctEv) {
         playSound('objection'); appendChat('lawyer', 'أنت (الدفاع)', `اعتراض! الدليل الجنائي "${ev.name}" يثبت العكس: ${step.successMsg}`);
-        setTimeout(() => { state.courtStepIndex++; processCourtDialogue(); }, 4000);
+        
+        setTimeout(() => {
+            nextBtn.innerHTML = `<span>متابعة الجلسة</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
+            nextBtn.classList.remove('hidden');
+            nextBtn.onclick = () => { state.courtStepIndex++; processCourtDialogue(); };
+            state.isProcessingLogic = false;
+            box.scrollTop = box.scrollHeight;
+        }, 800);
+        
     } else {
         playSound('fail'); state.perfectCurrentCase = false; state.attemptsLeft--; state.judgeConfidence -= 34; updateCourtUI();
         appendChat('lawyer', 'أنت (الدفاع)', `سيدي القاضي، أرجو التركيز على الدليل: "${ev.name}"...`);
+        
         setTimeout(() => {
-            document.getElementById('dialogue-box').classList.add('shake-anim'); setTimeout(()=>document.getElementById('dialogue-box').classList.remove('shake-anim'), 450);
-            appendChat('error', 'سيادة القاضي', step.failMsg + " خصم من ثقة المحكمة بتوجهك.");
-            if(state.attemptsLeft <= 0) setTimeout(() => finishCase(false, "تم طردك من القاعة بتهمة تضليل العدالة والقصور المهني."), 2500);
-            else setTimeout(() => { document.getElementById('court-present-action').classList.remove('hidden'); state.isProcessingLogic = false; }, 2000);
+            box.classList.add('shake-anim'); setTimeout(()=>box.classList.remove('shake-anim'), 450);
+            appendChat('error', 'سيادة القاضي', step.failMsg + " (خصم من ثقة المحكمة بتوجهك).");
+            
+            if(state.attemptsLeft <= 0) {
+                setTimeout(() => finishCase(false, "تم طردك من القاعة بتهمة تضليل العدالة والقصور المهني."), 2000);
+            } else {
+                nextBtn.innerHTML = `<span>محاولة أخرى</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 1 0 2.13-5.85L21 8"></path></svg>`;
+                nextBtn.classList.remove('hidden');
+                nextBtn.onclick = () => {
+                    nextBtn.classList.add('hidden');
+                    document.getElementById('court-present-action').classList.remove('hidden');
+                    box.scrollTop = box.scrollHeight;
+                };
+                state.isProcessingLogic = false;
+                box.scrollTop = box.scrollHeight;
+            }
         }, 1200);
     }
 }
@@ -425,7 +453,7 @@ function finishCase(isWin, desc) {
 }
 
 function renderStats() {
-    document.getElementById('stats-grid').innerHTML = `<div class="stat-box"><h3>${state.stats.wins}</h3><p>قضايا تم كسبها</p></div><div class="stat-box"><h3>${state.stats.losses}</h3><p>قضايا خاسرة</p></div><div class="stat-box"><h3>${state.stats.perfectCases}</h3><p>مرافعات لا تشوبها شائبة</p></div><div class="stat-box"><h3>${Math.round((state.solvedCases.length / ALL_CASES.length) * 100)}%</h3><p>معدل الإنجاز</p></div>`;
+    document.getElementById('stats-grid').innerHTML = `<div class="stat-box"><h3>${state.stats.wins}</h3><p>قضايا تم كسبها</p></div><div class="stat-box"><h3>${state.stats.losses}</h3><p>قضايا خاسرة</p></div><div class="stat-box"><h3>${state.stats.perfectCases}</h3><p>مرافعات مثالية</p></div><div class="stat-box"><h3>${Math.round((state.solvedCases.length / ALL_CASES.length) * 100)}%</h3><p>معدل الإنجاز</p></div>`;
     const achList = document.getElementById('achievements-list'); achList.innerHTML = '';
     ACHIEVEMENTS_DATA.forEach(a => {
         const unlocked = state.achievements.includes(a.id);
