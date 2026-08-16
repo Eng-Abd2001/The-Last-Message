@@ -1,11 +1,8 @@
-// --- حالة اللعبة (State) ---
 let gameState = {
     currentCaseId: 'case_01',
-    collectedEvidence: [],
-    level: 1
+    collectedEvidence: []
 };
 
-// --- عناصر الـ DOM ---
 const screens = {
     loading: document.getElementById('loading-screen'),
     lock: document.getElementById('lock-screen'),
@@ -16,38 +13,33 @@ const appContent = document.getElementById('app-content');
 const appTitle = document.getElementById('app-title');
 const evidenceCounter = document.getElementById('evidence-count');
 
-// --- التهيئة الأساسية ---
 window.onload = () => {
     loadProgress();
     updateClock();
-    setInterval(updateClock, 60000); // تحديث كل دقيقة
+    setInterval(updateClock, 60000);
     
-    // إخفاء التحميل
     setTimeout(() => {
         screens.loading.style.opacity = '0';
-        setTimeout(() => screens.loading.style.display = 'none', 1000);
+        setTimeout(() => screens.loading.style.display = 'none', 800);
     }, 1500);
 
     updateUIStats();
 };
 
-// --- التخزين ---
 function saveProgress() {
-    localStorage.setItem('detectiveGameState', JSON.stringify(gameState));
+    localStorage.setItem('detectiveStateNew', JSON.stringify(gameState));
     updateUIStats();
 }
 
 function loadProgress() {
-    const saved = localStorage.getItem('detectiveGameState');
+    const saved = localStorage.getItem('detectiveStateNew');
     if (saved) gameState = JSON.parse(saved);
 }
 
 function updateUIStats() {
-    document.getElementById('player-level').innerText = gameState.level;
     evidenceCounter.innerText = gameState.collectedEvidence.length;
 }
 
-// --- الساعة ---
 function updateClock() {
     const now = new Date();
     const timeString = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
@@ -55,22 +47,28 @@ function updateClock() {
     document.getElementById('lock-time').innerText = timeString;
 }
 
-// --- التنقل (Navigation) ---
-document.querySelector('.swipe-up-text').addEventListener('click', () => {
+// التنقل (السحب للأعلى للفتح)
+document.getElementById('swipe-up-btn').addEventListener('click', () => {
     screens.lock.classList.remove('active');
     screens.lock.classList.add('hidden');
     screens.home.classList.remove('hidden');
     screens.home.classList.add('active');
 });
 
-document.getElementById('home-btn').addEventListener('click', () => {
+// الخروج من التطبيق
+function closeApp() {
     screens.app.classList.remove('active');
     screens.app.classList.add('hidden');
-    screens.home.classList.remove('hidden');
-    screens.home.classList.add('active');
-});
+    setTimeout(() => {
+        screens.home.classList.remove('hidden');
+        screens.home.classList.add('active');
+    }, 100);
+}
 
-// --- فتح التطبيقات ---
+document.getElementById('back-btn').addEventListener('click', closeApp);
+document.getElementById('home-btn').addEventListener('click', closeApp);
+
+// فتح التطبيقات
 document.querySelectorAll('.app-icon').forEach(icon => {
     icon.addEventListener('click', () => {
         const appName = icon.getAttribute('data-app');
@@ -87,38 +85,25 @@ function openApp(appName) {
     screens.app.classList.remove('hidden');
     screens.app.classList.add('active');
 
-    const appTitles = {
-        messages: 'الرسائل', gallery: 'الصور', notes: 'الملاحظات', 
-        files: 'الملفات', calls: 'سجل المكالمات', browser: 'المتصفح', 
-        contacts: 'جهات الاتصال', evidence: 'لوحة الأدلة', analysis: 'التحليل النهائي'
-    };
-    appTitle.innerText = appTitles[appName] || 'تطبيق';
+    const appTitles = { messages: 'الرسائل', gallery: 'الصور', notes: 'الملاحظات', files: 'الملفات', calls: 'المكالمات', browser: 'Safari', evidence: 'الأدلة', analysis: 'إصدار الحكم' };
+    appTitle.innerText = appTitles[appName];
 
-    // مسارات التطبيقات
     if(appName === 'messages') renderMessages(caseData);
     if(appName === 'gallery') renderGallery(caseData);
     if(appName === 'notes') renderNotes(caseData);
     if(appName === 'files') renderFiles(caseData);
     if(appName === 'calls') renderCalls(caseData);
     if(appName === 'browser') renderBrowser(caseData);
-    if(appName === 'contacts') renderContacts(caseData);
-    if(appName === 'evidence') renderEvidence();
+    if(appName === 'evidence') renderEvidence(caseData);
     if(appName === 'analysis') renderAnalysis(caseData);
 }
 
-// --- 1. الرسائل ---
 function renderMessages(caseData) {
     caseData.appsData.messages.forEach(chat => {
         const char = caseData.characters[chat.contactId];
         const div = document.createElement('div');
         div.className = 'list-item';
-        div.innerHTML = `
-            <div class="item-avatar">${char.avatar}</div>
-            <div class="item-details">
-                <h4>${char.name}</h4>
-                <p>${chat.preview}</p>
-            </div>
-        `;
+        div.innerHTML = `<div class="item-avatar">${char.avatar}</div><div class="item-details"><h4>${char.name}</h4><p>${chat.preview}</p></div>`;
         div.onclick = () => renderChatThread(chat.thread, char.name);
         appContent.appendChild(div);
     });
@@ -127,29 +112,21 @@ function renderMessages(caseData) {
 function renderChatThread(thread, name) {
     appTitle.innerText = name;
     appContent.innerHTML = '';
-    
     thread.forEach(msg => {
         const bubble = document.createElement('div');
         const isFound = gameState.collectedEvidence.includes(msg.clueId);
         bubble.className = `bubble ${msg.type} ${msg.isClue ? 'clue-target' : ''} ${isFound ? 'found' : ''}`;
-        
-        bubble.innerHTML = `
-            <div>${msg.text}</div>
-            <div class="bubble-time">${msg.time}</div>
-        `;
-        
-        if (msg.isClue) {
-            bubble.onclick = () => collectEvidence(msg.clueId, msg.clueDesc, bubble);
-        }
+        bubble.innerHTML = `<div>${msg.text}</div><div class="bubble-time">${msg.time}</div>`;
+        if (msg.isClue) bubble.onclick = () => collectEvidence(msg.clueId, msg.clueDesc, bubble);
         appContent.appendChild(bubble);
     });
+    // Scroll to bottom
+    setTimeout(() => { appContent.scrollTop = appContent.scrollHeight; }, 50);
 }
 
-// --- 2. معرض الصور ---
 function renderGallery(caseData) {
     const grid = document.createElement('div');
     grid.className = 'gallery-grid';
-    
     caseData.appsData.gallery.forEach(img => {
         const thumb = document.createElement('div');
         thumb.className = 'gallery-thumb';
@@ -173,121 +150,67 @@ function openImageViewer(imgData) {
 
     if (imgData.hasClue && !gameState.collectedEvidence.includes(imgData.clueId)) {
         btn.classList.remove('hidden');
-        btn.onclick = () => {
-            collectEvidence(imgData.clueId, imgData.clueDesc, null);
-            btn.classList.add('hidden');
-        };
+        btn.onclick = () => { collectEvidence(imgData.clueId, imgData.clueDesc, null); btn.classList.add('hidden'); };
     } else {
         btn.classList.add('hidden');
     }
-
     viewer.classList.remove('hidden');
 }
 
-document.getElementById('close-image').onclick = () => {
-    document.getElementById('image-viewer').classList.add('hidden');
-};
+document.getElementById('close-image').onclick = () => document.getElementById('image-viewer').classList.add('hidden');
 
-// --- 3. الملاحظات ---
 function renderNotes(caseData) {
     caseData.appsData.notes.forEach(note => {
         const div = document.createElement('div');
         div.className = 'note-card';
-        div.innerHTML = `<h3 style="margin-bottom:10px; border-bottom:1px solid #ccc; padding-bottom:5px;">${note.title}</h3><p>${note.text.replace(/\n/g, '<br>')}</p>`;
+        div.innerHTML = `<h3 style="margin-bottom:10px; color:#b45309;">${note.title}</h3><p>${note.text}</p>`;
         appContent.appendChild(div);
     });
 }
 
-// --- 4. الملفات ---
 function renderFiles(caseData) {
     caseData.appsData.files.forEach(file => {
         const div = document.createElement('div');
         div.className = 'list-item';
-        div.innerHTML = `
-            <div class="item-avatar" style="background:#2563eb;">${file.type === 'locked' ? '🔒' : '📄'}</div>
-            <div class="item-details">
-                <h4>${file.name}</h4>
-                <p>${file.type === 'locked' ? 'مشفّر (يتطلب رقم سري)' : 'مفتوح'}</p>
-            </div>
-        `;
+        div.innerHTML = `<div class="item-avatar" style="background:#2563eb;">${file.type === 'locked' ? '🔒' : '📄'}</div><div class="item-details"><h4>${file.name}</h4><p>${file.type === 'locked' ? 'مشفّر (يتطلب رمز)' : 'مفتوح'}</p></div>`;
         div.onclick = () => {
             if (file.type === 'locked') {
-                const pass = prompt('أدخل الرمز السري للملف:');
+                const pass = prompt('أدخل الرمز السري للملف (4 أرقام):');
                 if (pass === file.password) {
                     alert('تم فك التشفير بنجاح!');
                     file.type = 'open';
                     if (file.isClue) collectEvidence(file.clueId, file.clueDesc, null);
-                    openApp('files'); // إعادة رسم الصفحة
-                } else if (pass !== null) {
-                    alert('الرمز خاطئ!');
-                }
-            } else {
-                alert(file.content);
-            }
+                    openApp('files'); 
+                } else if (pass !== null) alert('الرمز خاطئ!');
+            } else { alert(file.content); }
         };
         appContent.appendChild(div);
     });
 }
 
-// --- 5. المكالمات ---
 function renderCalls(caseData) {
     caseData.appsData.calls.forEach(call => {
         const div = document.createElement('div');
         div.className = 'list-item';
-        div.innerHTML = `
-            <div class="item-avatar" style="background:${call.type === 'missed' ? '#ef4444' : '#10b981'};">📞</div>
-            <div class="item-details">
-                <h4>${call.name}</h4>
-                <p>${call.time} | ${call.type === 'missed' ? 'فائتة' : 'مستلمة (' + call.duration + ')'}</p>
-            </div>
-        `;
+        div.innerHTML = `<div class="item-avatar" style="background:${call.type === 'missed' ? '#dc2626' : '#16a34a'};">📞</div><div class="item-details"><h4>${call.name}</h4><p>${call.time} | ${call.type === 'missed' ? 'فائتة' : 'مستلمة'}</p></div>`;
         appContent.appendChild(div);
     });
 }
 
-// --- 6. المتصفح ---
 function renderBrowser(caseData) {
     caseData.appsData.browser.forEach(site => {
         const div = document.createElement('div');
         div.className = 'list-item';
-        div.innerHTML = `
-            <div class="item-avatar" style="background:#8b5cf6;">🌐</div>
-            <div class="item-details">
-                <h4 style="color:#a78bfa;">${site.title}</h4>
-                <p>${site.url}</p>
-            </div>
-        `;
+        div.innerHTML = `<div class="item-avatar" style="background:#7c3aed;">🌐</div><div class="item-details"><h4 style="color:#c4b5fd;">${site.title}</h4><p style="font-size:11px;">${site.url}</p></div>`;
         appContent.appendChild(div);
     });
 }
 
-// --- 7. جهات الاتصال ---
-function renderContacts(caseData) {
-    Object.values(caseData.characters).forEach(char => {
-        const div = document.createElement('div');
-        div.className = 'list-item';
-        div.innerHTML = `
-            <div class="item-avatar">${char.avatar}</div>
-            <div class="item-details">
-                <h4>${char.name}</h4>
-                <p>${char.phone} <br><span style="font-size:11px; color:#64748b;">${char.relation}</span></p>
-            </div>
-        `;
-        appContent.appendChild(div);
-    });
-}
-
-// --- 8. لوحة الأدلة ---
-function renderEvidence() {
+function renderEvidence(caseData) {
     if (gameState.collectedEvidence.length === 0) {
-        appContent.innerHTML = '<p style="text-align:center; margin-top:50px; color:#64748b;">لم تقم بجمع أي أدلة بعد.</p>';
+        appContent.innerHTML = '<p style="text-align:center; margin-top:50px; color:#64748b;">لا توجد أدلة. اقرأ الرسائل والصور بدقة.</p>';
         return;
     }
-
-    // نستخرج بيانات الأدلة من الـ caseData باستخدام الـ IDs المحفوظة
-    const caseData = GameCases[gameState.currentCaseId];
-    
-    // تجميع كل الأدلة الموجودة في اللعبة للبحث فيها
     let allClues = [];
     caseData.appsData.messages.forEach(c => c.thread.forEach(m => { if(m.isClue) allClues.push(m); }));
     caseData.appsData.gallery.forEach(img => { if(img.hasClue) allClues.push(img); });
@@ -295,21 +218,18 @@ function renderEvidence() {
 
     gameState.collectedEvidence.forEach(evId => {
         const clue = allClues.find(c => c.clueId === evId);
-        const desc = clue ? clue.clueDesc : 'دليل محظور';
-
         const div = document.createElement('div');
         div.className = 'evidence-card';
-        div.innerHTML = `<h4>دليل رقم: #${Math.floor(Math.random()*9000)+1000}</h4><p>${desc}</p>`;
+        div.innerHTML = `<h4 style="color:#10b981; margin-bottom:5px;">دليل رقم: #${Math.floor(Math.random()*900)+100}</h4><p>${clue ? clue.clueDesc : ''}</p>`;
         appContent.appendChild(div);
     });
 }
 
-// --- 9. التحليل والنهاية ---
 function renderAnalysis(caseData) {
     appContent.innerHTML = `
-        <div style="background:#334155; padding:15px; border-radius:10px; margin-bottom:20px; text-align:center;">
-            <h3 style="color:#facc15; margin-bottom:10px;">إغلاق القضية</h3>
-            <p style="font-size:13px; color:#cbd5e1;">بناءً على الأدلة (${gameState.collectedEvidence.length}/${caseData.requiredEvidence.length})، من هو المسؤول؟ اختر بعناية.</p>
+        <div style="background:#27272a; padding:20px; border-radius:15px; margin-bottom:20px; text-align:center;">
+            <h3 style="color:#facc15; margin-bottom:10px;">إصدار الحكم</h3>
+            <p style="font-size:14px; color:#cbd5e1; line-height:1.6;">الأدلة المجموعة: (${gameState.collectedEvidence.length}/${caseData.requiredEvidence.length}).<br>من هو الخائن الذي دسّ السم لنادر؟</p>
         </div>
     `;
     
@@ -323,13 +243,10 @@ function renderAnalysis(caseData) {
     });
 }
 
-// --- ميكانيكا اللعبة ---
-
 function collectEvidence(clueId, desc, element) {
     if (!gameState.collectedEvidence.includes(clueId)) {
         gameState.collectedEvidence.push(clueId);
         saveProgress();
-
         if (element) element.classList.add('found');
         showNotification(desc);
     }
@@ -338,38 +255,33 @@ function collectEvidence(clueId, desc, element) {
 function showNotification(text) {
     const notif = document.getElementById('notification');
     document.getElementById('notif-desc').innerText = text;
-    
     notif.classList.remove('hidden');
     notif.classList.add('show');
     if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-
     setTimeout(() => { notif.classList.remove('show'); }, 4000);
 }
 
 function handleEnding(suspectId, caseData) {
-    if (!confirm('هل أنت متأكد من قرارك؟ لا يمكن التراجع!')) return;
+    if (!confirm('القرار نهائي ولن تتمكن من تغييره. هل أنت متأكد؟')) return;
 
     let endingType = 'wrong';
-
-    if (suspectId === 'boss') {
+    // الحل الصحيح هو "رامي" (الصديق الخائن)
+    if (suspectId === 'friend') {
         const hasAllEvidence = caseData.requiredEvidence.every(ev => gameState.collectedEvidence.includes(ev));
-        endingType = hasAllEvidence ? 'perfect' : 'partial';
+        endingType = hasAllEvidence ? 'perfect' : 'partial'; // إذا اختار رامي بس مجمعش الأدلة، تعتبر Partial
+    } else if (suspectId === 'suspect') {
+        endingType = 'partial'; // اختار الرأس المدبر بس نسي مين اللي حط السم
     }
 
     const modal = document.getElementById('ending-modal');
-    const titleObj = document.getElementById('ending-title');
-    const descObj = document.getElementById('ending-desc');
-    const finalEnding = caseData.endings[endingType];
-    
-    titleObj.innerText = finalEnding.title;
-    titleObj.style.color = endingType === 'perfect' ? 'var(--success)' : (endingType === 'wrong' ? 'var(--danger)' : '#facc15');
-    descObj.innerText = finalEnding.text;
+    document.getElementById('ending-title').innerText = caseData.endings[endingType].title;
+    document.getElementById('ending-title').style.color = endingType === 'perfect' ? 'var(--success)' : (endingType === 'wrong' ? 'var(--danger)' : '#facc15');
+    document.getElementById('ending-desc').innerText = caseData.endings[endingType].text;
 
     modal.classList.remove('hidden');
 }
 
-// إعادة اللعبة
 document.getElementById('restart-btn').addEventListener('click', () => {
-    localStorage.removeItem('detectiveGameState');
+    localStorage.removeItem('detectiveStateNew');
     window.location.reload();
 });
