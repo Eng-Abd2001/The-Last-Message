@@ -2,135 +2,140 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>المحامي الأخير - The Last Argument</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="game-container">
+        <!-- Sound Controls -->
+        <button id="sound-toggle" aria-label="تشغيل الصوت">🔊</button>
 
-    <!-- Sound Controls -->
-    <button id="sound-toggle" onclick="toggleSound()">🔊</button>
+        <!-- UI Overlays -->
+        <div id="toast-container"></div>
+        <div id="achievement-container"></div>
 
-    <!-- UI Overlay for Messages & Achievements -->
-    <div id="toast-container"></div>
-    <div id="achievement-container"></div>
-
-    <!-- Screen 1: Start Screen -->
-    <div id="start-screen" class="screen active">
-        <div class="logo-container">
-            <h1>المحامي الأخير</h1>
-            <p class="subtitle">The Last Argument</p>
-        </div>
-        <p class="cinematic-desc">في مدينة لا ترحم، الحقيقة تُدفن تحت الأكاذيب... وحدك من يمكنه كشف التناقض، لا فرصة ثانية في هذه القاعة.</p>
-        <button class="gold-btn" onclick="showScreen('cases-screen'); playSound('start');">بدء اللعب</button>
-        <button class="outline-btn" onclick="showScreen('stats-screen'); playSound('click');">إحصائياتي</button>
-    </div>
-
-    <!-- Screen 2: Stats & Progress -->
-    <div id="stats-screen" class="screen">
-        <h2>سجل المحامي</h2>
-        <div class="stats-grid" id="stats-grid">
-            <!-- Populated by JS -->
-        </div>
-        <div class="achievements-list" id="achievements-list">
-            <!-- Populated by JS -->
-        </div>
-        <button class="gold-btn share-btn" id="share-btn" onclick="shareStats()">مشاركة السجل 🔗</button>
-        <button class="outline-btn mt-20" onclick="showScreen('start-screen'); playSound('click');">العودة</button>
-    </div>
-
-    <!-- Screen 3: Cases List -->
-    <div id="cases-screen" class="screen">
-        <h2>ملفات القضايا</h2>
-        <div class="cases-container" id="cases-container">
-            <!-- Populated by JS -->
-        </div>
-        <button class="outline-btn mt-20" onclick="showScreen('start-screen'); playSound('click');">العودة</button>
-    </div>
-
-    <!-- Screen 4: Investigation Phase -->
-    <div id="investigation-screen" class="screen">
-        <div class="top-bar">
-            <span id="inv-case-title">القضية</span>
-            <button class="outline-btn small" onclick="openFileModal()">📁 ملف القضية</button>
-        </div>
-        
-        <div class="investigation-area" id="investigation-area">
-            <!-- Spots Populated by JS -->
-        </div>
-
-        <div class="bottom-panel">
-            <h3>حقيبة الأدلة (<span id="ev-count">0</span>)</h3>
-            <div class="evidence-tray" id="evidence-tray">
-                <!-- Populated by JS -->
-            </div>
-            <button class="gold-btn full-width mt-10" id="to-court-btn" onclick="goToCourt()" style="display: none;">التوجه للمحكمة ⚖️</button>
-        </div>
-    </div>
-
-    <!-- Screen 5: Courtroom Phase -->
-    <div id="court-screen" class="screen">
-        <div class="court-top">
-            <div class="judge-confidence">
-                <span>ثقة القاضي:</span>
-                <div class="confidence-bar"><div class="fill" id="confidence-fill"></div></div>
-            </div>
-            <div class="attempts-left">محاولات: <span id="court-attempts">3</span></div>
-        </div>
-
-        <div class="court-stage">
-            <div class="character-box judge">
-                <div class="avatar judge-avatar">👨‍⚖️</div>
-                <div class="name">القاضي</div>
-            </div>
-            <div class="character-box witness">
-                <div class="avatar witness-avatar">👤</div>
-                <div class="name" id="witness-name">الشاهد</div>
+        <!-- Modal for Case File -->
+        <div id="file-modal" class="modal">
+            <div class="modal-content">
+                <button class="close-btn" onclick="closeModal('file-modal')">&times;</button>
+                <h2 id="modal-case-title">عنوان القضية</h2>
+                <div class="modal-body" id="modal-case-body"></div>
             </div>
         </div>
 
-        <div class="dialogue-box" id="dialogue-box">
-            <!-- Dialogue Populated by JS -->
-        </div>
-
-        <div class="court-actions" id="court-actions">
-            <h3>تقديم دليل لكشف التناقض:</h3>
-            <div class="evidence-tray court-tray" id="court-evidence-tray">
-                <!-- Populated by JS -->
-            </div>
-            <button class="outline-btn" onclick="nextCourtStep()">متابعة الاستجواب ➡️</button>
-        </div>
-    </div>
-
-    <!-- Screen 6: Final Argument -->
-    <div id="final-argument-screen" class="screen">
-        <h2 class="alert-text">المرافعة الأخيرة!</h2>
-        <p class="final-desc">لديك <span id="final-timer" class="gold-text">30</span> ثانية لتقديم استنتاجك النهائي.</p>
-        
-        <div class="argument-options" id="argument-options">
-            <!-- Populated by JS -->
-        </div>
-    </div>
-
-    <!-- Screen 7: Result Screen -->
-    <div id="result-screen" class="screen">
-        <h1 id="result-title">النتيجة</h1>
-        <p id="result-desc"></p>
-        <div class="result-stats" id="result-stats-details"></div>
-        <button class="gold-btn mt-20" onclick="showScreen('cases-screen'); playSound('click');">العودة للملفات</button>
-    </div>
-
-    <!-- Modal for Case File -->
-    <div id="file-modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('file-modal')">&times;</span>
-            <h2 id="modal-case-title">عنوان القضية</h2>
-            <div class="modal-body" id="modal-case-body">
-                <!-- Populated by JS -->
+        <!-- Screen 1: Start Screen -->
+        <div id="start-screen" class="screen active">
+            <div class="center-content">
+                <div class="logo-container">
+                    <h1>المحامي الأخير</h1>
+                    <p class="subtitle">THE LAST ARGUMENT</p>
+                </div>
+                <p class="cinematic-desc">في مدينة لا ترحم، الحقيقة تُدفن تحت الأكاذيب... لا توجد فرصة ثانية في هذه القاعة.</p>
+                <div class="action-buttons">
+                    <button class="gold-btn full-width" onclick="startGame()">بدء اللعب</button>
+                    <button class="outline-btn full-width mt-10" onclick="showScreen('stats-screen')">السجل والإحصائيات</button>
+                </div>
             </div>
         </div>
-    </div>
 
+        <!-- Screen 2: Stats & Progress -->
+        <div id="stats-screen" class="screen">
+            <div class="screen-header">
+                <h2>سجل المحامي</h2>
+                <button class="icon-btn" onclick="showScreen('start-screen')">🔙</button>
+            </div>
+            <div class="scrollable-content">
+                <div class="stats-grid" id="stats-grid"></div>
+                <h3 class="section-title">الإنجازات</h3>
+                <div class="achievements-list" id="achievements-list"></div>
+            </div>
+            <div class="bottom-action">
+                <button class="gold-btn full-width" id="share-btn" onclick="shareStats()">مشاركة السجل 🔗</button>
+            </div>
+        </div>
+
+        <!-- Screen 3: Cases List -->
+        <div id="cases-screen" class="screen">
+            <div class="screen-header">
+                <h2>ملفات القضايا</h2>
+                <button class="icon-btn" onclick="showScreen('start-screen')">🔙</button>
+            </div>
+            <div class="scrollable-content cases-container" id="cases-container"></div>
+        </div>
+
+        <!-- Screen 4: Investigation Phase -->
+        <div id="investigation-screen" class="screen">
+            <div class="screen-header">
+                <h2 id="inv-case-title" class="truncate">القضية</h2>
+                <button class="outline-btn small" onclick="openFileModal()">📁 الملف</button>
+            </div>
+            
+            <div class="investigation-wrapper">
+                <div class="investigation-area" id="investigation-area"></div>
+            </div>
+
+            <div class="bottom-panel">
+                <div class="panel-header">
+                    <h3>الأدلة المجمعة (<span id="ev-count">0</span>)</h3>
+                </div>
+                <div class="evidence-tray" id="evidence-tray"></div>
+                <button class="gold-btn full-width hidden mt-10" id="to-court-btn" onclick="goToCourt()">التوجه للمحكمة ⚖️</button>
+            </div>
+        </div>
+
+        <!-- Screen 5: Courtroom Phase -->
+        <div id="court-screen" class="screen">
+            <div class="court-top">
+                <div class="judge-confidence">
+                    <span>ثقة القاضي</span>
+                    <div class="confidence-bar"><div class="fill" id="confidence-fill"></div></div>
+                </div>
+                <div class="attempts-left">محاولات: <span id="court-attempts">3</span></div>
+            </div>
+
+            <div class="court-stage">
+                <div class="character-box judge">
+                    <div class="avatar">👨‍⚖️</div>
+                    <div class="name">القاضي</div>
+                </div>
+                <div class="character-box witness">
+                    <div class="avatar">👤</div>
+                    <div class="name" id="witness-name">الشاهد</div>
+                </div>
+            </div>
+
+            <div class="scrollable-content court-chat" id="dialogue-box"></div>
+
+            <div class="court-actions-panel">
+                <div id="court-present-action" class="hidden">
+                    <h3 class="mb-10 text-center gold-text">اختر دليلاً لكشف التناقض</h3>
+                    <div class="evidence-tray" id="court-evidence-tray"></div>
+                </div>
+                <button class="outline-btn full-width mt-10" id="next-dialogue-btn" onclick="nextCourtStep()">متابعة الاستجواب ➡️</button>
+            </div>
+        </div>
+
+        <!-- Screen 6: Final Argument -->
+        <div id="final-argument-screen" class="screen">
+            <div class="center-content">
+                <h2 class="alert-text pulse-anim">المرافعة الأخيرة!</h2>
+                <p class="final-desc">لديك <span id="final-timer" class="gold-text">30</span> ثانية لتقديم استنتاجك النهائي.</p>
+                <div class="argument-options" id="argument-options"></div>
+            </div>
+        </div>
+
+        <!-- Screen 7: Result Screen -->
+        <div id="result-screen" class="screen">
+            <div class="center-content">
+                <div id="result-icon" class="result-icon">⚖️</div>
+                <h1 id="result-title">النتيجة</h1>
+                <p id="result-desc" class="mt-10 mb-20"></p>
+                <div class="result-stats" id="result-stats-details"></div>
+                <button class="gold-btn full-width mt-20" onclick="showScreen('cases-screen')">العودة للملفات</button>
+            </div>
+        </div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
