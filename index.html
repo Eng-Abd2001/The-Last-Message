@@ -11,8 +11,8 @@
         <!-- Pattern Overlay -->
         <div class="bg-pattern"></div>
 
-        <!-- Sound Toggle -->
-        <button id="sound-toggle" class="icon-only-btn" aria-label="الصوت">
+        <!-- Sound Toggle (Fixed Position to avoid overlap) -->
+        <button id="sound-toggle" aria-label="تبديل الصوت">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
         </button>
 
@@ -36,7 +36,7 @@
 
         <!-- Screen 1: Start Screen -->
         <div id="start-screen" class="screen active">
-            <div class="center-content">
+            <div class="center-content safe-top">
                 <div class="logo-visual">
                     <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 2v20"></path><path d="M3 7h18"></path>
@@ -50,15 +50,15 @@
                     <p class="subtitle">THE LAST ARGUMENT</p>
                 </div>
                 <div class="separator-line"></div>
-                <p class="cinematic-desc">في مدينة لا ترحم، الحقيقة تُدفن تحت الأكاذيب... لا توجد فرصة ثانية في المحكمة.</p>
+                <p class="cinematic-desc">في أروقة هذه المحكمة، الحقيقة لا تُمنح... بل تُنتزع. جهّز أدلتك، فلا مجال للخطأ هنا.</p>
                 <div class="action-buttons">
                     <button class="gold-btn full-width" onclick="startGame()">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                        <span>بدء اللعب</span>
+                        <span>دخول المحكمة</span>
                     </button>
                     <button class="outline-btn full-width mt-15" onclick="showScreen('stats-screen')">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
-                        <span>السجل والإحصائيات</span>
+                        <span>السجل الجنائي والإحصائيات</span>
                     </button>
                 </div>
             </div>
@@ -75,7 +75,7 @@
             <div class="scrollable-content">
                 <div class="stats-grid" id="stats-grid"></div>
                 <div class="separator-line mb-20"></div>
-                <h3 class="section-title">الأوسمة والإنجازات</h3>
+                <h3 class="section-title">الأوسمة الفخرية</h3>
                 <div class="achievements-list" id="achievements-list"></div>
             </div>
             <div class="bottom-action">
@@ -89,7 +89,7 @@
         <!-- Screen 3: Cases List -->
         <div id="cases-screen" class="screen">
             <div class="screen-header">
-                <h2>ملفات القضايا</h2>
+                <h2>ملفات التحقيق</h2>
                 <button class="icon-only-btn outline-icon" onclick="showScreen('start-screen')">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
                 </button>
@@ -103,12 +103,12 @@
                 <h2 id="inv-case-title" class="truncate">القضية</h2>
                 <button class="outline-btn small-btn" onclick="openFileModal()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
-                    <span>الملف</span>
+                    <span>تفاصيل الملف</span>
                 </button>
             </div>
             
             <div class="investigation-wrapper">
-                <div class="investigation-hint">ابحث عن الأدلة (اضغط على الأرقام)</div>
+                <div class="investigation-hint">امسح مسرح الجريمة بحثاً عن الأدلة (اضغط على الأرقام)</div>
                 <div class="investigation-area-container">
                     <div class="investigation-area" id="investigation-area"></div>
                 </div>
@@ -116,11 +116,11 @@
 
             <div class="bottom-panel">
                 <div class="panel-header">
-                    <h3>حقيبة الأدلة (<span id="ev-count" class="gold-text">0</span>)</h3>
+                    <h3>حقيبة الأدلة الجنائية (<span id="ev-count" class="gold-text">0</span>)</h3>
                 </div>
                 <div class="evidence-tray" id="evidence-tray"></div>
                 <button class="gold-btn full-width hidden mt-10 glow-btn" id="to-court-btn" onclick="goToCourt()">
-                    <span>التوجه للمحكمة ⚖️</span>
+                    <span>بدء المحاكمة ⚖️</span>
                 </button>
             </div>
         </div>
@@ -129,20 +129,20 @@
         <div id="court-screen" class="screen">
             <div class="court-top">
                 <div class="judge-confidence">
-                    <span>ثقة المحكمة</span>
+                    <span>ثقة هيئة المحلفين</span>
                     <div class="confidence-bar"><div class="fill" id="confidence-fill"></div></div>
                 </div>
-                <div class="attempts-left">محاولات: <span id="court-attempts">3</span></div>
+                <div class="attempts-left">اعتراضات متبقية: <span id="court-attempts">3</span></div>
             </div>
 
             <div class="court-stage">
                 <div class="character-box judge">
                     <div class="avatar-img"><svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
-                    <div class="name">القاضي</div>
+                    <div class="name">سيادة القاضي</div>
                 </div>
                 <div class="character-box witness">
                     <div class="avatar-img witness-color"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
-                    <div class="name" id="witness-name">الشاهد</div>
+                    <div class="name" id="witness-name">الشاهد / الخصم</div>
                 </div>
             </div>
 
@@ -150,11 +150,11 @@
 
             <div class="court-actions-panel">
                 <div id="court-present-action" class="hidden">
-                    <h3 class="mb-10 text-center gold-text text-spacing">اختر الدليل لكشف التناقض</h3>
+                    <h3 class="mb-10 text-center gold-text text-spacing">قدم دليلاً يدحض هذا الإدعاء</h3>
                     <div class="court-evidence-chips" id="court-evidence-tray"></div>
                 </div>
                 <button class="outline-btn full-width mt-10" id="next-dialogue-btn" onclick="nextCourtStep()">
-                    <span>متابعة الجلسة</span>
+                    <span>متابعة الاستجواب</span>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </button>
             </div>
@@ -166,9 +166,9 @@
                 <div class="logo-visual alert-visual">
                     <svg viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                 </div>
-                <h2 class="alert-text pulse-anim text-spacing mt-10">المرافعة الأخيرة!</h2>
+                <h2 class="alert-text pulse-anim text-spacing mt-10">المرافعة الختامية!</h2>
                 <div class="separator-line my-15"></div>
-                <p class="final-desc">لديك <span id="final-timer" class="gold-text">30</span> ثانية لتقديم استنتاجك النهائي.</p>
+                <p class="final-desc">لديك <span id="final-timer" class="gold-text">30</span> ثانية فقط لتقديم استنتاجك النهائي أمام المحكمة.</p>
                 <div class="argument-options mt-15" id="argument-options"></div>
             </div>
         </div>
@@ -177,11 +177,11 @@
         <div id="result-screen" class="screen">
             <div class="center-content">
                 <div id="result-icon-container" class="logo-visual"></div>
-                <h1 id="result-title" class="text-spacing mt-10">النتيجة</h1>
+                <h1 id="result-title" class="text-spacing mt-10">نطق الحكم</h1>
                 <p id="result-desc" class="mt-15 mb-20"></p>
                 <div class="result-stats" id="result-stats-details"></div>
                 <button class="gold-btn full-width mt-20 glow-btn" onclick="showScreen('cases-screen')">
-                    <span>العودة لملفات القضايا</span>
+                    <span>العودة للأرشيف الجنائي</span>
                 </button>
             </div>
         </div>
