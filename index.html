@@ -12,7 +12,7 @@
     <div id="loading-screen">
         <div class="loader"></div>
         <h1>المحقق داخل الهاتف</h1>
-        <p>جاري تحميل النظام...</p>
+        <p>جاري فك تشفير النظام...</p>
     </div>
 
     <!-- حاوية اللعبة -->
@@ -23,57 +23,73 @@
             <div id="status-bar">
                 <span id="clock">12:00</span>
                 <div class="status-icons">
-                    <span>📶</span>
-                    <span>🔋 85%</span>
+                    <span>📶 LTE</span>
+                    <span>🔋 14%</span>
                 </div>
             </div>
 
             <!-- شاشة القفل -->
             <div id="lock-screen" class="screen active">
-                <h1 id="lock-time">12:00</h1>
-                <p id="lock-date">الجمعة، 15 أكتوبر</p>
+                <div class="lock-header">
+                    <h1 id="lock-time">12:00</h1>
+                    <p id="lock-date">الجمعة، 15 أكتوبر</p>
+                </div>
+                <div class="lock-notifications">
+                    <div class="lock-notif">
+                        <strong>سارة (الزوجة)</strong>
+                        <span>أين أنت يا أحمد؟ رد علي!</span>
+                    </div>
+                    <div class="lock-notif">
+                        <strong>المدير محمود</strong>
+                        <span>مكالمة فائتة</span>
+                    </div>
+                </div>
                 <div class="swipe-up-text">اسحب للأعلى لفتح الهاتف ⬆️</div>
             </div>
 
-            <!-- الشاشة الرئيسية (التطبيقات) -->
+            <!-- الشاشة الرئيسية -->
             <div id="home-screen" class="screen hidden">
                 <div class="apps-grid">
                     <div class="app-icon" data-app="messages">
-                        <div class="icon-bg" style="background: #25D366;">💬</div>
+                        <div class="icon-bg" style="background: linear-gradient(45deg, #25D366, #128C7E);">💬</div>
                         <span>الرسائل</span>
+                        <div class="badge">3</div>
                     </div>
                     <div class="app-icon" data-app="gallery">
-                        <div class="icon-bg" style="background: #FF2D55;">🖼️</div>
+                        <div class="icon-bg" style="background: linear-gradient(45deg, #FF2D55, #FF375F);">🖼️</div>
                         <span>الصور</span>
                     </div>
                     <div class="app-icon" data-app="notes">
-                        <div class="icon-bg" style="background: #FFD60A;">📝</div>
+                        <div class="icon-bg" style="background: linear-gradient(45deg, #FFD60A, #FF9F0A);">📝</div>
                         <span>الملاحظات</span>
                     </div>
                     <div class="app-icon" data-app="files">
-                        <div class="icon-bg" style="background: #007AFF;">📁</div>
+                        <div class="icon-bg" style="background: linear-gradient(45deg, #0A84FF, #007AFF);">📁</div>
                         <span>الملفات</span>
                     </div>
                     <div class="app-icon" data-app="calls">
-                        <div class="icon-bg" style="background: #34C759;">📞</div>
+                        <div class="icon-bg" style="background: linear-gradient(45deg, #30D158, #34C759);">📞</div>
                         <span>المكالمات</span>
                     </div>
                     <div class="app-icon" data-app="browser">
-                        <div class="icon-bg" style="background: #5856D6;">🌐</div>
+                        <div class="icon-bg" style="background: linear-gradient(45deg, #5E5CE6, #5856D6);">🌐</div>
                         <span>المتصفح</span>
                     </div>
+                    <div class="app-icon" data-app="contacts">
+                        <div class="icon-bg" style="background: linear-gradient(45deg, #8E8E93, #636366);">👤</div>
+                        <span>الأسماء</span>
+                    </div>
                     <div class="app-icon" data-app="evidence">
-                        <div class="icon-bg" style="background: #FF9500;">🔍</div>
+                        <div class="icon-bg" style="background: linear-gradient(45deg, #FF9F0A, #FF8C00);">🔍</div>
                         <span>الأدلة</span>
                     </div>
                     <div class="app-icon" data-app="analysis">
-                        <div class="icon-bg" style="background: #AF52DE;">⚖️</div>
+                        <div class="icon-bg" style="background: linear-gradient(45deg, #BF5AF2, #AF52DE);">⚖️</div>
                         <span>التحليل</span>
                     </div>
                 </div>
-                
                 <div class="player-stats">
-                    المستوى: <span id="player-level">1</span> | نقاط الخبرة: <span id="player-xp">0</span>
+                    المستوى: <span id="player-level">1</span> | الأدلة: <span id="evidence-count">0</span>/4
                 </div>
             </div>
 
@@ -81,19 +97,25 @@
             <div id="app-container" class="screen hidden">
                 <div id="app-header">
                     <button id="home-btn">◀ رجوع</button>
-                    <h2 id="app-title">اسم التطبيق</h2>
+                    <h2 id="app-title">التطبيق</h2>
                 </div>
-                <div id="app-content">
-                    <!-- يتم حقن محتوى التطبيقات هنا عبر JS -->
-                </div>
+                <div id="app-content"></div>
             </div>
 
-            <!-- إشعارات الأدلة -->
+            <!-- عارض الصور (مخفي افتراضياً) -->
+            <div id="image-viewer" class="hidden">
+                <button id="close-image">✖</button>
+                <div id="image-frame"></div>
+                <p id="image-caption"></p>
+                <button id="extract-clue-btn" class="hidden">استخراج الدليل 🔍</button>
+            </div>
+
+            <!-- الإشعارات -->
             <div id="notification" class="hidden">
                 <div class="notif-icon">❗️</div>
                 <div class="notif-text">
-                    <h4>دليل جديد!</h4>
-                    <p id="notif-desc">تم العثور على رسالة مشبوهة.</p>
+                    <h4>تم اكتشاف دليل!</h4>
+                    <p id="notif-desc">...</p>
                 </div>
             </div>
             
@@ -105,7 +127,7 @@
         <div class="modal-content">
             <h1 id="ending-title">النهاية</h1>
             <p id="ending-desc">وصف النهاية يظهر هنا.</p>
-            <button id="restart-btn">إعادة القضية</button>
+            <button id="restart-btn">العودة للواقع (إعادة)</button>
         </div>
     </div>
 
