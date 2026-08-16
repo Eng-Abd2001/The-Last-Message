@@ -3,134 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>المحقق داخل الهاتف</title>
+    <title>Echo: نسخة الغد</title>
+    <meta name="description" content="واجه نسختك المستقبلية في تحدي نفسي فريد.">
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a0a0a">
 </head>
 <body>
-
-    <!-- شاشة التحميل -->
-    <div id="loading-screen">
-        <div class="loader"></div>
-        <h1>استخراج البيانات...</h1>
-    </div>
-
-    <!-- الغلاف الخارجي لضمان التوسيط -->
-    <div id="game-wrapper">
-        <!-- الهاتف -->
-        <div id="phone">
-            
-            <!-- شريط الحالة العلوي -->
-            <div id="status-bar">
-                <span id="clock">12:00</span>
-                <div class="dynamic-island"></div>
-                <div class="status-icons">
-                    <span>📶 5G</span>
-                    <span>🔋 12%</span>
-                </div>
-            </div>
-
-            <!-- شاشة القفل -->
-            <div id="lock-screen" class="screen active">
-                <div class="lock-header">
-                    <h1 id="lock-time">12:00</h1>
-                    <p id="lock-date">الاثنين، 22 نوفمبر</p>
-                </div>
-                <div class="lock-notifications">
-                    <div class="lock-notif">
-                        <strong>الظل (رسالة مشفرة)</strong>
-                        <span>لقد تم اختراق دائرتك.. احذر!</span>
-                    </div>
-                </div>
-                <div class="swipe-area" id="swipe-up-btn">
-                    <div class="swipe-text">اسحب للأعلى للفتح</div>
-                    <div class="home-indicator-lock"></div>
-                </div>
-            </div>
-
-            <!-- الشاشة الرئيسية (التطبيقات) -->
-            <div id="home-screen" class="screen hidden">
-                <div class="apps-grid">
-                    <div class="app-icon" data-app="messages">
-                        <div class="icon-bg msg-bg">💬</div>
-                        <span>الرسائل</span><div class="badge">2</div>
-                    </div>
-                    <div class="app-icon" data-app="gallery">
-                        <div class="icon-bg gal-bg">🖼️</div>
-                        <span>الصور</span>
-                    </div>
-                    <div class="app-icon" data-app="notes">
-                        <div class="icon-bg not-bg">📝</div>
-                        <span>الملاحظات</span>
-                    </div>
-                    <div class="app-icon" data-app="files">
-                        <div class="icon-bg fil-bg">📁</div>
-                        <span>الملفات</span>
-                    </div>
-                    <div class="app-icon" data-app="calls">
-                        <div class="icon-bg cal-bg">📞</div>
-                        <span>المكالمات</span>
-                    </div>
-                    <div class="app-icon" data-app="browser">
-                        <div class="icon-bg web-bg">🌐</div>
-                        <span>المتصفح</span>
-                    </div>
-                    <div class="app-icon" data-app="evidence">
-                        <div class="icon-bg evi-bg">🔍</div>
-                        <span>الأدلة</span>
-                    </div>
-                    <div class="app-icon" data-app="analysis">
-                        <div class="icon-bg ana-bg">⚖️</div>
-                        <span>التحليل</span>
-                    </div>
-                </div>
-                <div class="player-stats">
-                    الأدلة المكتشفة: <span id="evidence-count">0</span>/4
-                </div>
-            </div>
-
-            <!-- حاوية التطبيق المفتوح -->
-            <div id="app-container" class="screen hidden">
-                <div id="app-header">
-                    <button id="back-btn">❮ رجوع</button>
-                    <h2 id="app-title">التطبيق</h2>
-                    <div style="width: 60px;"></div>
-                </div>
-                <div id="app-content"></div>
-                <div class="home-indicator-area" id="home-btn">
-                    <div class="home-indicator"></div>
-                </div>
-            </div>
-
-            <!-- عارض الصور -->
-            <div id="image-viewer" class="hidden">
-                <button id="close-image">✖</button>
-                <div id="image-frame"></div>
-                <p id="image-caption"></p>
-                <button id="extract-clue-btn" class="hidden">استخراج الدليل 🔍</button>
-            </div>
-
-            <!-- إشعارات الأدلة -->
-            <div id="notification" class="hidden">
-                <div class="notif-icon">💡</div>
-                <div class="notif-text">
-                    <h4>دليل جديد!</h4>
-                    <p id="notif-desc">...</p>
-                </div>
-            </div>
-
-        </div> <!-- نهاية الهاتف -->
-    </div>
-
-    <!-- نافذة النهاية -->
-    <div id="ending-modal" class="hidden">
-        <div class="modal-content">
-            <h1 id="ending-title">النهاية</h1>
-            <p id="ending-desc">وصف النهاية يظهر هنا.</p>
-            <button id="restart-btn">العودة للواقع (إعادة اللعب)</button>
+    <div id="glitch-overlay"></div>
+    
+    <!-- شاشة البداية -->
+    <section id="screen-intro" class="screen active">
+        <div class="content">
+            <h1 class="glitch-text" data-text="ECHO">ECHO</h1>
+            <h2 class="subtitle">نسخة الغد</h2>
+            <p class="description">أنت لا تواجه خصماً عادياً.. أنت تواجه نسختك المستقبلية. اللعبة ستراقب أخطاءك، تحلل سرعة استجابتك، وتبني خصماً يمثلك.. هل يمكنك هزيمة نفسك؟</p>
+            <button id="btn-start" class="neon-btn">ابدأ التحدي المتزامن</button>
         </div>
-    </div>
+    </section>
 
-    <script src="cases.js"></script>
-    <script src="script.js"></script>
+    <!-- واجهة اللعب -->
+    <section id="screen-game" class="screen">
+        <header id="game-hud">
+            <div class="stat">المستوى: <span id="hud-level">1</span></div>
+            <div class="stat">XP: <span id="hud-xp">0</span></div>
+            <div class="stat">المرحلة: <span id="hud-phase">السرعة</span></div>
+        </header>
+        <div id="game-container">
+            <!-- المحتوى يتغير برمجياً -->
+        </div>
+        <div id="ai-progress-container" class="hidden">
+            <div class="progress-label">نسختك المستقبلية:</div>
+            <div class="progress-bar"><div id="ai-progress-fill"></div></div>
+        </div>
+    </section>
+
+    <!-- شاشة النتيجة -->
+    <section id="screen-result" class="screen">
+        <div class="content">
+            <h2 class="glitch-text" data-text="التحليل النهائي">التحليل النهائي</h2>
+            <div id="result-stats" class="stats-grid">
+                <!-- يتم ملؤها برمجياً -->
+            </div>
+            <h3 class="player-title">اللقب: <span id="final-title">المبتدئ</span></h3>
+            <div class="action-buttons">
+                <button id="btn-restart" class="neon-btn">إعادة التهيئة</button>
+                <button id="btn-share" class="neon-btn outline">شارك نتيجتك</button>
+            </div>
+        </div>
+    </section>
+
+    <script src="game.js"></script>
 </body>
 </html>
