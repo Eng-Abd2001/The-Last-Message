@@ -1,171 +1,158 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OUT OF FRAME | خارج المشهد</title>
-    <meta name="description" content="ما لا تراه... قد يتغير. لعبة ألغاز سينمائية نفسية.">
-    <meta name="theme-color" content="#050505">
-    <meta property="og:title" content="OUT OF FRAME | خارج المشهد">
-    <meta property="og:description" content="ما لا تراه... قد يتغير. العب الآن.">
-    <link rel="manifest" href="manifest.webmanifest">
-    <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08090b">
+<meta name="description" content="OUT OF FRAME — لعبة ألغاز سينمائية حيث ما لا تراه قد يتغير.">
+<meta property="og:title" content="OUT OF FRAME — خارج المشهد">
+<meta property="og:description" content="ما لا تراه... قد يتغير.">
+<title>OUT OF FRAME — خارج المشهد</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="vignette"></div>
-    <div id="film-grain"></div>
+<div id="app">
+  <div id="grain"></div>
+  <div id="flash"></div>
 
-    <!-- Splash Screen -->
-    <div id="screen-splash" class="screen active cinematic-fade">
-        <h1 class="title-main">OUT OF FRAME</h1>
-        <h2 class="title-sub">خارج المشهد</h2>
-        <p class="tagline">ما لا تراه... قد يتغير.</p>
-        <button id="btn-start" class="btn primary mt-lg">ابدأ | START</button>
+  <section id="splash" class="screen active">
+    <div class="brand">
+      <div class="eyebrow">A CINEMATIC PUZZLE EXPERIENCE</div>
+      <h1>OUT OF <span>FRAME</span></h1>
+      <p>خارج المشهد</p>
+      <small>ما لا تراه... قد يتغير.</small>
     </div>
+    <button id="startBtn" class="primary">ابدأ</button>
+  </section>
 
-    <!-- Main Menu -->
-    <div id="screen-menu" class="screen hidden cinematic-fade">
-        <h1 class="title-main small">OUT OF FRAME</h1>
-        <div class="menu-list">
-            <button id="btn-continue" class="btn" disabled>متابعة | Continue</button>
-            <button id="btn-chapters" class="btn">الفصول | Chapters</button>
-            <button id="btn-daily" class="btn">لغز اليوم | Daily Mystery</button>
-            <button id="btn-endless" class="btn">لا نهائي | Endless</button>
-            <button id="btn-stats" class="btn">الإحصائيات | Stats</button>
-            <button id="btn-achievements" class="btn">الإنجازات | Achievements</button>
-            <button id="btn-settings" class="btn">الإعدادات | Settings</button>
-            <button id="btn-credits" class="btn">الحقوق | Credits</button>
-        </div>
+  <section id="menu" class="screen">
+    <div class="menu-bg"><div class="moon"></div><div class="shadow-person"></div></div>
+    <div class="menu-panel">
+      <div class="eyebrow">OUT OF FRAME</div>
+      <h2>خارج المشهد</h2>
+      <div class="menu-actions">
+        <button id="continueBtn" class="primary">متابعة</button>
+        <button id="chaptersBtn">الفصول</button>
+        <button id="dailyBtn">لغز اليوم</button>
+        <button id="statsBtn">الإحصائيات</button>
+        <button id="settingsBtn">الإعدادات</button>
+        <button id="howBtn">كيف تُلعب؟</button>
+      </div>
+      <div class="menu-footer">© OUT OF FRAME</div>
     </div>
+  </section>
 
-    <!-- Chapters Screen -->
-    <div id="screen-chapters" class="screen hidden cinematic-fade">
-        <div class="header">
-            <button class="btn-icon btn-back">⟵</button>
-            <h2 id="txt-chapters-title">الفصول</h2>
-        </div>
-        <div id="chapters-container" class="grid-container"></div>
+  <section id="chapters" class="screen modal-screen">
+    <div class="modal">
+      <button class="close" data-close>×</button>
+      <div class="eyebrow">CHAPTERS</div>
+      <h2>الفصول</h2>
+      <div id="chapterGrid" class="chapter-grid"></div>
     </div>
+  </section>
 
-    <!-- Levels Screen -->
-    <div id="screen-levels" class="screen hidden cinematic-fade">
-        <div class="header">
-            <button class="btn-icon btn-back-chapters">⟵</button>
-            <h2 id="current-chapter-title">Chapter 1</h2>
-        </div>
-        <div id="levels-container" class="grid-container levels-grid"></div>
+  <section id="levels" class="screen modal-screen">
+    <div class="modal wide">
+      <button class="close" data-close>×</button>
+      <div class="eyebrow">LEVEL SELECT</div>
+      <h2 id="levelsTitle">الفصل</h2>
+      <div id="levelGrid" class="level-grid"></div>
     </div>
+  </section>
 
-    <!-- Game Screen -->
-    <div id="screen-game" class="screen hidden">
-        <canvas id="game-canvas"></canvas>
-        
-        <div id="game-hud">
-            <div class="hud-top">
-                <button id="btn-pause" class="btn-icon">⏸</button>
-                <div id="hud-level-info">Level 1</div>
-                <button id="btn-hint" class="btn-icon">💡</button>
-            </div>
-            <div class="hud-bottom">
-                <button id="btn-undo" class="btn-icon">↺</button>
-                <div id="camera-hint" class="hud-message">اسحب لتحريك الكاميرا</div>
-                <button id="btn-restart" class="btn-icon">↻</button>
-            </div>
-        </div>
-
-        <div id="hint-overlay" class="overlay hidden cinematic-fade">
-            <div class="modal">
-                <h3>تلميح</h3>
-                <p id="hint-text"></p>
-                <div class="modal-actions">
-                    <button id="btn-next-hint" class="btn secondary">التلميح التالي</button>
-                    <button id="btn-close-hint" class="btn">إغلاق</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="pause-overlay" class="overlay hidden cinematic-fade">
-            <div class="modal">
-                <h3>إيقاف مؤقت</h3>
-                <button id="btn-resume" class="btn primary">متابعة</button>
-                <button id="btn-settings-ingame" class="btn secondary">الإعدادات</button>
-                <button id="btn-quit" class="btn danger">خروج</button>
-            </div>
-        </div>
-
-        <div id="level-complete-overlay" class="overlay hidden cinematic-fade">
-            <div class="modal">
-                <h3 id="txt-complete-title">اكتمل المشهد</h3>
-                <div id="stars-container" class="stars">⭐⭐⭐</div>
-                <div class="stats-row">
-                    <span id="stat-time">الوقت: 00:00</span>
-                    <span id="stat-moves">الحركات: 0</span>
-                </div>
-                <div class="modal-actions mt-lg">
-                    <button id="btn-next-level" class="btn primary">التالي</button>
-                    <button id="btn-replay-level" class="btn secondary">إعادة</button>
-                    <button id="btn-share" class="btn secondary">مشاركة</button>
-                    <button id="btn-menu-complete" class="btn">القائمة</button>
-                </div>
-            </div>
-        </div>
+  <section id="how" class="screen modal-screen">
+    <div class="modal">
+      <button class="close" data-close>×</button>
+      <div class="eyebrow">THE RULE</div>
+      <h2>كيف تُلعب؟</h2>
+      <div class="how-content">
+        <p>في OUT OF FRAME، <b>المراقبة جزء من اللغز.</b></p>
+        <p>حرّك الكاميرا واكتشف ما يحدث عندما تخرج الأشياء من مجال رؤيتك.</p>
+        <div class="rule-card"><span>01</span><b>راقب</b><small>حرّك المشهد وابحث عن التفاصيل.</small></div>
+        <div class="rule-card"><span>02</span><b>ابتعد</b><small>بعض الأشياء تتغير عندما لا تراها.</small></div>
+        <div class="rule-card"><span>03</span><b>استنتج</b><small>اكتشف قانون الغرفة، ثم استخدمه.</small></div>
+        <p class="muted">التحكم: السحب على الهاتف — الأسهم أو WASD على الكمبيوتر.</p>
+      </div>
     </div>
+  </section>
 
-    <!-- Settings Screen -->
-    <div id="screen-settings" class="screen hidden cinematic-fade">
-        <div class="header">
-            <button class="btn-icon btn-back">⟵</button>
-            <h2>الإعدادات</h2>
-        </div>
-        <div class="settings-list">
-            <div class="setting-item">
-                <span>اللغة | Language</span>
-                <button id="btn-lang" class="btn secondary">العربية</button>
-            </div>
-            <div class="setting-item">
-                <span>المؤثرات الصوتية</span>
-                <button id="btn-sound" class="btn secondary">مفعل</button>
-            </div>
-            <div class="setting-item">
-                <span>حركة الكاميرا</span>
-                <button id="btn-motion" class="btn secondary">عالي</button>
-            </div>
-            <div class="setting-item mt-lg">
-                <button id="btn-reset-data" class="btn danger">حذف التقدم</button>
-            </div>
-        </div>
+  <section id="stats" class="screen modal-screen">
+    <div class="modal">
+      <button class="close" data-close>×</button>
+      <div class="eyebrow">STATISTICS</div>
+      <h2>الإحصائيات</h2>
+      <div id="statsGrid" class="stats-grid"></div>
+          <div class="achievements">
+        <h3>الإنجازات</h3>
+        <div id="achievementGrid"></div>
+      </div>
     </div>
+  </section>
 
-    <!-- Stats & Achievements, Credits (Reusing generic containers) -->
-    <div id="screen-stats" class="screen hidden cinematic-fade">
-        <div class="header">
-            <button class="btn-icon btn-back">⟵</button>
-            <h2>الإحصائيات</h2>
-        </div>
-        <div id="stats-content" class="content-box"></div>
+  <section id="settings" class="screen modal-screen">
+    <div class="modal">
+      <button class="close" data-close>×</button>
+      <div class="eyebrow">SETTINGS</div>
+      <h2>الإعدادات</h2>
+      <div class="settings-list">
+        <label>المؤثرات الصوتية <input type="checkbox" id="soundToggle" checked></label>
+        <label>الحركة السينمائية <input type="checkbox" id="motionToggle" checked></label>
+        <label>جودة المؤثرات <select id="quality"><option>High</option><option>Low</option></select></label>
+      </div>
+      <button id="resetBtn" class="danger">مسح التقدم</button>
     </div>
+  </section>
 
-    <div id="screen-achievements" class="screen hidden cinematic-fade">
-        <div class="header">
-            <button class="btn-icon btn-back">⟵</button>
-            <h2>الإنجازات</h2>
-        </div>
-        <div id="achievements-content" class="grid-container"></div>
+  <section id="daily" class="screen modal-screen">
+    <div class="modal">
+      <button class="close" data-close>×</button>
+      <div class="eyebrow">DAILY MYSTERY</div>
+      <h2>لغز اليوم</h2>
+      <p id="dailyIntro" class="muted"></p>
+      <div id="dailyPuzzle" class="daily-puzzle"></div>
+      <button id="dailyShare" class="primary" disabled>مشاركة النتيجة</button>
     </div>
+  </section>
 
-    <div id="screen-credits" class="screen hidden cinematic-fade">
-        <div class="header">
-            <button class="btn-icon btn-back">⟵</button>
-            <h2>الحقوق</h2>
-        </div>
-        <div class="content-box text-center">
-            <h3>OUT OF FRAME</h3>
-            <p>Original Web Puzzle Game</p>
-            <p>Built with HTML5, CSS3, JavaScript</p>
-            <p class="mt-lg text-muted">جميع الحقوق محفوظة &copy; 2024</p>
-        </div>
+  <section id="game" class="screen game-screen">
+    <div id="scene">
+      <div class="ceiling-light"></div>
+      <div class="room">
+        <div class="wall back"></div>
+        <div class="wall left"></div>
+        <div class="wall right"></div>
+        <div class="floor"></div>
+        <div id="window" class="window"><div class="outside"></div></div>
+        <div id="painting" class="painting"><span></span></div>
+        <div id="clock" class="clock"><b></b><i></i></div>
+        <div id="chair" class="chair"><div class="chair-back"></div><div class="chair-seat"></div><div class="leg l"></div><div class="leg r"></div></div>
+        <div id="table" class="table"><div class="table-top"></div><div class="table-leg a"></div><div class="table-leg b"></div></div>
+        <div id="key" class="key">◆</div>
+        <div id="door" class="door"><div class="door-knob"></div></div>
+        <div id="figure" class="figure"><div class="head"></div><div class="body"></div></div>
+        <div id="shadow" class="shadow"></div>
+      </div>
+      <div id="cameraVignette"></div>
+      <div id="chapterCaption"></div>
+      <div id="levelHintText"></div>
     </div>
-
-    <script src="script.js"></script>
+    <div class="game-hud">
+      <button id="backGame">‹</button>
+      <div class="level-info"><span id="gameChapter"></span><b id="gameLevel"></b></div>
+      <div class="hud-actions"><button id="undoBtn">↶</button><button id="hintBtn">?</button><button id="restartBtn">↻</button></div>
+    </div>
+    <div id="levelComplete" class="complete-overlay">
+      <div class="complete-card">
+        <div class="eyebrow">TRUTH DISCOVERED</div>
+        <h2 id="completeTitle">اكتشفت الحقيقة</h2>
+        <p id="completeText"></p>
+        <div id="stars" class="stars">☆☆☆</div>
+        <div class="complete-actions"><button id="nextBtn" class="primary">التالي</button><button id="replayBtn">إعادة</button></div>
+      </div>
+    </div>
+  </section>
+</div>
+<script src="script.js"></script><script>if("serviceWorker" in navigator) navigator.serviceWorker.register("service-worker.js").catch(()=>{});</script>
 </body>
 </html>
