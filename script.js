@@ -1,10 +1,9 @@
 /**
  * OUT OF FRAME - Core Game Engine
  * Senior Architecture, Pure Vanilla JS ES6+
- * (Fully Fixed Version)
+ * (Cache-Busted & Bulletproof Version)
  */
 
-// --- I18n (Localization) ---
 const Translations = {
     ar: {
         start: 'ابدأ', continue: 'متابعة', chapters: 'الفصول', daily: 'لغز اليوم',
@@ -32,10 +31,9 @@ const Translations = {
     }
 };
 
-// --- Storage Manager ---
 class StorageManager {
     constructor() {
-        this.key = 'OutOfFrame_SaveData';
+        this.key = 'OutOfFrame_SaveData_v2';
         this.data = this.load();
     }
     load() {
@@ -56,31 +54,36 @@ class StorageManager {
     reset() { this.data = this.defaultData(); this.save(); }
 }
 
-// --- Audio Manager (Web Audio API) ---
 class AudioManager {
     constructor(storage) {
         this.storage = storage;
-        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        try {
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        } catch(e) {
+            console.warn('Audio API disabled');
+            this.ctx = { state: 'suspended', resume: () => {} };
+        }
         this.enabled = storage.data.sound;
     }
     playTone(freq, type = 'sine', duration = 0.1, vol = 0.1) {
-        if (!this.enabled || this.ctx.state === 'suspended') return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-        gain.gain.setValueAtTime(vol, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
-        osc.connect(gain); gain.connect(this.ctx.destination);
-        osc.start(); osc.stop(this.ctx.currentTime + duration);
+        if (!this.enabled || !this.ctx.createOscillator || this.ctx.state === 'suspended') return;
+        try {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+            osc.connect(gain); gain.connect(this.ctx.destination);
+            osc.start(); osc.stop(this.ctx.currentTime + duration);
+        } catch(e) {}
     }
     playClick() { this.playTone(400, 'square', 0.05, 0.05); }
     playMove() { this.playTone(200, 'sine', 0.1, 0.03); }
     playSuccess() { this.playTone(600, 'sine', 0.3, 0.1); setTimeout(()=>this.playTone(800, 'sine', 0.5, 0.1), 150); }
-    playWhisper() { this.playTone(100, 'triangle', 1.0, 0.02); } // Ambient
-    resume() { if(this.ctx.state === 'suspended') this.ctx.resume(); }
+    playWhisper() { this.playTone(100, 'triangle', 1.0, 0.02); }
+    resume() { if(this.ctx.resume && this.ctx.state === 'suspended') this.ctx.resume(); }
 }
 
-// --- Level Builder (Generates 60 unique deterministic levels) ---
 class LevelManager {
     static getChapters() {
         return [
@@ -114,12 +117,10 @@ class LevelManager {
                 behavior: rule
             });
         }
-        
         return { id: levelIndex, size, entities, rule, timeLimit: 30 + levelIndex * 5 };
     }
 }
 
-// --- Game Engine ---
 class GameEngine {
     constructor(canvas, uiManager) {
         this.canvas = canvas;
@@ -149,21 +150,12 @@ class GameEngine {
     loadLevel(levelData) {
         this.level = JSON.parse(JSON.stringify(levelData)); 
         this.gridSize = this.level.size;
-        
         const p = this.level.entities.find(e => e.type === 'player');
         this.player = { x: p.x, y: p.y };
-        
         this.cellSize = Math.min(this.canvas.width, this.canvas.height) / (this.gridSize + 2);
-        
-        this.camera.x = this.player.x;
-        this.camera.y = this.player.y;
-        this.camera.targetX = this.player.x;
-        this.camera.targetY = this.player.y;
-        
-        this.moves = 0;
-        this.startTime = Date.now();
-        this.state = 'playing';
-        
+        this.camera.x = this.player.x; this.camera.y = this.player.y;
+        this.camera.targetX = this.player.x; this.camera.targetY = this.player.y;
+        this.moves = 0; this.startTime = Date.now(); this.state = 'playing';
         this.updateVisibility();
         this.loop();
     }
@@ -171,7 +163,6 @@ class GameEngine {
     setupInputs() {
         let isDragging = false;
         let lastX = 0, lastY = 0;
-        
         const down = (e) => {
             if(this.state !== 'playing') return;
             isDragging = true;
@@ -182,58 +173,38 @@ class GameEngine {
             if(!isDragging || this.state !== 'playing') return;
             let cx = e.touches ? e.touches[0].clientX : e.clientX;
             let cy = e.touches ? e.touches[0].clientY : e.clientY;
-            
-            let dx = (lastX - cx) / this.cellSize;
-            let dy = (lastY - cy) / this.cellSize;
-            
-            this.camera.targetX += dx;
-            this.camera.targetY += dy;
-            
+            let dx = (lastX - cx) / this.cellSize; let dy = (lastY - cy) / this.cellSize;
+            this.camera.targetX += dx; this.camera.targetY += dy;
             this.camera.targetX = Math.max(-2, Math.min(this.gridSize + 1, this.camera.targetX));
             this.camera.targetY = Math.max(-2, Math.min(this.gridSize + 1, this.camera.targetY));
-            
             lastX = cx; lastY = cy;
             this.updateVisibility();
         };
         const up = (e) => {
             if(isDragging) { isDragging = false; return; }
             if(this.state !== 'playing') return;
-            
             let cx = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
             let cy = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
-            
             this.attemptMove(cx, cy);
         };
-        
-        this.canvas.addEventListener('mousedown', down);
-        this.canvas.addEventListener('mousemove', move);
-        this.canvas.addEventListener('mouseup', up);
-        this.canvas.addEventListener('touchstart', down, {passive: true});
-        this.canvas.addEventListener('touchmove', move, {passive: true});
-        this.canvas.addEventListener('touchend', up);
+        this.canvas.addEventListener('mousedown', down); this.canvas.addEventListener('mousemove', move); this.canvas.addEventListener('mouseup', up);
+        this.canvas.addEventListener('touchstart', down, {passive: true}); this.canvas.addEventListener('touchmove', move, {passive: true}); this.canvas.addEventListener('touchend', up);
     }
     
     attemptMove(screenX, screenY) {
         const offsetX = (this.canvas.width - this.gridSize * this.cellSize) / 2;
         const offsetY = (this.canvas.height - this.gridSize * this.cellSize) / 2;
-        
         const gridX = Math.floor((screenX - offsetX + (this.camera.x - this.gridSize/2)*this.cellSize) / this.cellSize + this.gridSize/2);
         const gridY = Math.floor((screenY - offsetY + (this.camera.y - this.gridSize/2)*this.cellSize) / this.cellSize + this.gridSize/2);
         
-        let dx = gridX - this.player.x;
-        let dy = gridY - this.player.y;
-        
+        let dx = gridX - this.player.x; let dy = gridY - this.player.y;
         if (Math.abs(dx) + Math.abs(dy) === 1) {
             let obstacle = this.level.entities.find(e => e.x === gridX && e.y === gridY && e.type.includes('wall') && e.state === 'solid');
             if(!obstacle) {
-                this.player.x = gridX;
-                this.player.y = gridY;
-                this.moves++;
-                this.ui.audio.playMove();
-                this.camera.targetX = this.player.x;
-                this.camera.targetY = this.player.y;
-                this.updateVisibility();
-                this.checkWin();
+                this.player.x = gridX; this.player.y = gridY;
+                this.moves++; this.ui.audio.playMove();
+                this.camera.targetX = this.player.x; this.camera.targetY = this.player.y;
+                this.updateVisibility(); this.checkWin();
             }
         }
     }
@@ -243,7 +214,6 @@ class GameEngine {
             if (e.type === 'quantum_wall') {
                 const dist = Math.hypot(e.x - this.camera.x, e.y - this.camera.y);
                 const isVisible = dist < this.camera.fov;
-                
                 switch(e.behavior) {
                     case 'invisibility': e.state = isVisible ? 'solid' : 'hidden'; break;
                     case 'movement': e.state = isVisible ? 'hidden' : 'solid'; break;
@@ -266,17 +236,13 @@ class GameEngine {
     loop() {
         if(this.state !== 'playing') return;
         requestAnimationFrame(() => this.loop());
-        
         this.camera.x += (this.camera.targetX - this.camera.x) * 0.1;
         this.camera.y += (this.camera.targetY - this.camera.y) * 0.1;
-        
         this.render();
     }
     
     render() {
-        this.ctx.fillStyle = '#050507';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        
+        this.ctx.fillStyle = '#050507'; this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         if(!this.level) return;
         
         this.ctx.save();
@@ -285,39 +251,26 @@ class GameEngine {
         this.ctx.translate(offsetX, offsetY);
         
         const rad = this.ctx.createRadialGradient(
-            this.camera.x * this.cellSize + this.cellSize/2, 
-            this.camera.y * this.cellSize + this.cellSize/2, 
-            0,
-            this.camera.x * this.cellSize + this.cellSize/2, 
-            this.camera.y * this.cellSize + this.cellSize/2, 
-            this.camera.fov * this.cellSize
+            this.camera.x * this.cellSize + this.cellSize/2, this.camera.y * this.cellSize + this.cellSize/2, 0,
+            this.camera.x * this.cellSize + this.cellSize/2, this.camera.y * this.cellSize + this.cellSize/2, this.camera.fov * this.cellSize
         );
-        rad.addColorStop(0, 'rgba(255,255,255,0.05)');
-        rad.addColorStop(1, 'rgba(0,0,0,0)');
-        this.ctx.fillStyle = rad;
-        this.ctx.fillRect(-offsetX, -offsetY, this.canvas.width, this.canvas.height);
+        rad.addColorStop(0, 'rgba(255,255,255,0.05)'); rad.addColorStop(1, 'rgba(0,0,0,0)');
+        this.ctx.fillStyle = rad; this.ctx.fillRect(-offsetX, -offsetY, this.canvas.width, this.canvas.height);
 
         this.level.entities.forEach(e => {
             if (e.type === 'player') return; 
-            
             this.ctx.beginPath();
             this.ctx.rect(e.x * this.cellSize + 2, e.y * this.cellSize + 2, this.cellSize - 4, this.cellSize - 4);
             
             if (e.type === 'exit') {
-                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                this.ctx.shadowBlur = 15;
-                this.ctx.shadowColor = '#fff';
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'; this.ctx.shadowBlur = 15; this.ctx.shadowColor = '#fff';
             } else if (e.type.includes('wall')) {
                 if (e.state === 'solid') {
-                    this.ctx.fillStyle = '#1a1a24';
-                    this.ctx.strokeStyle = '#2e596b';
-                    this.ctx.lineWidth = 1;
-                    this.ctx.stroke();
+                    this.ctx.fillStyle = '#1a1a24'; this.ctx.strokeStyle = '#2e596b';
+                    this.ctx.lineWidth = 1; this.ctx.stroke();
                 } else {
-                    this.ctx.strokeStyle = 'rgba(46, 89, 107, 0.2)';
-                    this.ctx.lineWidth = 1;
-                    this.ctx.stroke();
-                    this.ctx.fillStyle = 'transparent';
+                    this.ctx.strokeStyle = 'rgba(46, 89, 107, 0.2)'; this.ctx.lineWidth = 1;
+                    this.ctx.stroke(); this.ctx.fillStyle = 'transparent';
                 }
                 this.ctx.shadowBlur = 0;
             }
@@ -326,31 +279,28 @@ class GameEngine {
         
         this.ctx.beginPath();
         this.ctx.arc(this.player.x * this.cellSize + this.cellSize/2, this.player.y * this.cellSize + this.cellSize/2, this.cellSize/4, 0, Math.PI*2);
-        this.ctx.fillStyle = '#4a6b7c';
-        this.ctx.shadowBlur = 20;
-        this.ctx.shadowColor = '#4a6b7c';
-        this.ctx.fill();
-        
+        this.ctx.fillStyle = '#4a6b7c'; this.ctx.shadowBlur = 20; this.ctx.shadowColor = '#4a6b7c'; this.ctx.fill();
         this.ctx.restore();
     }
 }
 
-// --- UI & Game Manager ---
 class UIManager {
     constructor() {
         this.storage = new StorageManager();
         this.audio = new AudioManager(this.storage);
         this.lang = this.storage.data.lang;
-        
         document.documentElement.lang = this.lang;
         document.documentElement.dir = this.lang === 'ar' ? 'rtl' : 'ltr';
         
-        this.initDOM();
-        this.bindEvents();
-        
-        this.engine = new GameEngine(document.getElementById('game-canvas'), this);
-        
-        setTimeout(() => this.showScreen('screen-splash'), 100);
+        try {
+            this.initDOM();
+            this.bindEvents();
+            this.engine = new GameEngine(document.getElementById('game-canvas'), this);
+            setTimeout(() => this.showScreen('screen-splash'), 100);
+        } catch (error) {
+            console.error("Game Initialization Error:", error);
+            alert("حدث خطأ أثناء تحميل اللعبة. الرجاء إعادة تحديث الصفحة.");
+        }
     }
     
     initDOM() {
@@ -360,27 +310,22 @@ class UIManager {
     }
     
     updateTexts() {
-        document.getElementById('btn-start').innerText = this.t('start');
-        document.getElementById('btn-continue').innerText = this.t('continue');
-        document.getElementById('btn-chapters').innerText = this.t('chapters');
-        document.getElementById('btn-daily').innerText = this.t('daily');
-        document.getElementById('btn-endless').innerText = this.t('endless');
-        document.getElementById('btn-stats').innerText = this.t('stats');
-        document.getElementById('btn-achievements').innerText = this.t('achievements');
-        document.getElementById('btn-settings').innerText = this.t('settings');
-        document.getElementById('btn-credits').innerText = this.t('credits');
-        
-        document.getElementById('btn-lang').innerText = this.lang === 'ar' ? 'العربية' : 'English';
-        document.getElementById('btn-sound').innerText = this.storage.data.sound ? this.t('on') : this.t('off');
-        document.getElementById('camera-hint').innerText = this.t('cameraHint');
+        const setTxt = (id, txt) => { const el = document.getElementById(id); if(el) el.innerText = txt; };
+        setTxt('btn-start', this.t('start')); setTxt('btn-continue', this.t('continue'));
+        setTxt('btn-chapters', this.t('chapters')); setTxt('btn-daily', this.t('daily'));
+        setTxt('btn-endless', this.t('endless')); setTxt('btn-stats', this.t('stats'));
+        setTxt('btn-achievements', this.t('achievements')); setTxt('btn-settings', this.t('settings'));
+        setTxt('btn-credits', this.t('credits')); setTxt('btn-lang', this.lang === 'ar' ? 'العربية' : 'English');
+        setTxt('btn-sound', this.storage.data.sound ? this.t('on') : this.t('off'));
+        setTxt('camera-hint', this.t('cameraHint'));
         
         const btnContinue = document.getElementById('btn-continue');
-        if (this.storage.data.currentLevel > 1) {
-            btnContinue.disabled = false;
-            btnContinue.classList.add('primary');
-        } else {
-            btnContinue.disabled = true;
-            btnContinue.classList.remove('primary');
+        if (btnContinue) {
+            if (this.storage.data.currentLevel > 1) {
+                btnContinue.disabled = false; btnContinue.classList.add('primary');
+            } else {
+                btnContinue.disabled = true; btnContinue.classList.remove('primary');
+            }
         }
     }
     
@@ -388,141 +333,80 @@ class UIManager {
         this.screens.forEach(s => {
             if (s.id !== id) {
                 s.classList.remove('active');
-                setTimeout(() => {
-                    if (!s.classList.contains('active')) s.classList.add('hidden');
-                }, 500);
+                setTimeout(() => { if (!s.classList.contains('active')) s.classList.add('hidden'); }, 500);
             }
         });
-        
         const target = document.getElementById(id);
         if (target) {
             target.classList.remove('hidden');
             setTimeout(() => target.classList.add('active'), 10);
         }
-        
-        if (id !== 'screen-splash' && this.audio) {
-            this.audio.playClick();
-        }
+        if (id !== 'screen-splash' && this.audio) this.audio.playClick();
     }
     
     bindEvents() {
-        document.getElementById('btn-start').onclick = () => { this.audio.resume(); this.showScreen('screen-menu'); };
-        document.getElementById('btn-continue').onclick = () => this.startGame(this.storage.data.currentLevel);
-        document.getElementById('btn-chapters').onclick = () => this.renderChapters();
-        document.getElementById('btn-settings').onclick = () => this.showScreen('screen-settings');
-        document.getElementById('btn-credits').onclick = () => this.showScreen('screen-credits');
-        document.getElementById('btn-stats').onclick = () => this.renderStats();
+        const bind = (id, fn) => { const el = document.getElementById(id); if(el) el.onclick = fn; };
+        
+        bind('btn-start', () => { this.audio.resume(); this.showScreen('screen-menu'); });
+        bind('btn-continue', () => this.startGame(this.storage.data.currentLevel));
+        bind('btn-chapters', () => this.renderChapters());
+        bind('btn-settings', () => this.showScreen('screen-settings'));
+        bind('btn-credits', () => this.showScreen('screen-credits'));
+        bind('btn-stats', () => this.renderStats());
         
         document.querySelectorAll('.btn-back').forEach(b => b.onclick = () => this.showScreen('screen-menu'));
         const btnBackChapters = document.querySelector('.btn-back-chapters');
         if(btnBackChapters) btnBackChapters.onclick = () => this.showScreen('screen-chapters');
         
-        document.getElementById('btn-lang').onclick = () => {
-            this.lang = this.lang === 'ar' ? 'en' : 'ar';
-            this.storage.data.lang = this.lang;
-            this.storage.save();
-            document.documentElement.lang = this.lang;
-            document.documentElement.dir = this.lang === 'ar' ? 'rtl' : 'ltr';
-            this.updateTexts();
-        };
+        bind('btn-lang', () => {
+            this.lang = this.lang === 'ar' ? 'en' : 'ar'; this.storage.data.lang = this.lang;
+            this.storage.save(); document.documentElement.lang = this.lang;
+            document.documentElement.dir = this.lang === 'ar' ? 'rtl' : 'ltr'; this.updateTexts();
+        });
         
-        document.getElementById('btn-sound').onclick = () => {
-            this.storage.data.sound = !this.storage.data.sound;
-            this.audio.enabled = this.storage.data.sound;
-            this.storage.save();
-            this.updateTexts();
-        };
+        bind('btn-sound', () => {
+            this.storage.data.sound = !this.storage.data.sound; this.audio.enabled = this.storage.data.sound;
+            this.storage.save(); this.updateTexts();
+        });
         
-        document.getElementById('btn-reset-data').onclick = () => {
-            if(confirm('Are you sure? This cannot be undone.')) {
-                this.storage.reset();
-                window.location.reload();
-            }
-        };
+        bind('btn-reset-data', () => {
+            if(confirm('Are you sure? This cannot be undone.')) { this.storage.reset(); window.location.reload(); }
+        });
 
-        document.getElementById('btn-pause').onclick = () => {
-            this.engine.state = 'paused';
-            document.getElementById('pause-overlay').classList.remove('hidden');
-        };
+        bind('btn-pause', () => { this.engine.state = 'paused'; document.getElementById('pause-overlay').classList.remove('hidden'); });
+        bind('btn-resume', () => { document.getElementById('pause-overlay').classList.add('hidden'); this.engine.state = 'playing'; });
+        bind('btn-settings-ingame', () => { document.getElementById('pause-overlay').classList.add('hidden'); this.showScreen('screen-settings'); });
+        bind('btn-quit', () => { document.getElementById('pause-overlay').classList.add('hidden'); this.showScreen('screen-menu'); });
+        bind('btn-restart', () => this.startGame(this.engine.level.id));
         
-        document.getElementById('btn-resume').onclick = () => {
-            document.getElementById('pause-overlay').classList.add('hidden');
-            this.engine.state = 'playing';
-        };
-        
-        const btnSettingsIngame = document.getElementById('btn-settings-ingame');
-        if(btnSettingsIngame) {
-            btnSettingsIngame.onclick = () => {
-                document.getElementById('pause-overlay').classList.add('hidden');
-                this.showScreen('screen-settings');
-            };
-        }
-        
-        document.getElementById('btn-quit').onclick = () => {
-            document.getElementById('pause-overlay').classList.add('hidden');
-            this.showScreen('screen-menu');
-        };
-        
-        document.getElementById('btn-restart').onclick = () => {
-            this.startGame(this.engine.level.id);
-        };
-        
-        // Hint System Events
         let currentHint = 1;
-        document.getElementById('btn-hint').onclick = () => {
+        bind('btn-hint', () => {
             document.getElementById('hint-overlay').classList.remove('hidden');
-            document.getElementById('hint-text').innerText = this.t('hint1');
-            currentHint = 1;
-        };
-        
-        document.getElementById('btn-close-hint').onclick = () => {
-            document.getElementById('hint-overlay').classList.add('hidden');
-        };
-        
-        document.getElementById('btn-next-hint').onclick = () => {
+            document.getElementById('hint-text').innerText = this.t('hint1'); currentHint = 1;
+        });
+        bind('btn-close-hint', () => document.getElementById('hint-overlay').classList.add('hidden'));
+        bind('btn-next-hint', () => {
             currentHint = currentHint >= 3 ? 1 : currentHint + 1;
             document.getElementById('hint-text').innerText = this.t('hint' + currentHint);
-        };
+        });
 
-        // Complete Level Events
-        document.getElementById('btn-next-level').onclick = () => {
-            document.getElementById('level-complete-overlay').classList.add('hidden');
-            this.startGame(this.engine.level.id + 1);
-        };
-        
-        document.getElementById('btn-menu-complete').onclick = () => {
-            document.getElementById('level-complete-overlay').classList.add('hidden');
-            this.showScreen('screen-menu');
-        };
-        
-        document.getElementById('btn-replay-level').onclick = () => {
-            document.getElementById('level-complete-overlay').classList.add('hidden');
-            this.startGame(this.engine.level.id);
-        };
-        
-        document.getElementById('btn-share').onclick = () => {
+        bind('btn-next-level', () => { document.getElementById('level-complete-overlay').classList.add('hidden'); this.startGame(this.engine.level.id + 1); });
+        bind('btn-menu-complete', () => { document.getElementById('level-complete-overlay').classList.add('hidden'); this.showScreen('screen-menu'); });
+        bind('btn-replay-level', () => { document.getElementById('level-complete-overlay').classList.add('hidden'); this.startGame(this.engine.level.id); });
+        bind('btn-share', () => {
             const text = `OUT OF FRAME\nScene ${this.engine.level.id} Solved!\n⭐⭐⭐\nTime: ${this.engine.elapsed}s`;
-            if (navigator.share) navigator.share({ text });
-            else navigator.clipboard.writeText(text).then(()=>alert('Copied!'));
-        };
+            if (navigator.share) navigator.share({ text }); else navigator.clipboard.writeText(text).then(()=>alert('Copied!'));
+        });
     }
     
     renderChapters() {
         this.showScreen('screen-chapters');
-        const container = document.getElementById('chapters-container');
-        container.innerHTML = '';
-        
+        const container = document.getElementById('chapters-container'); container.innerHTML = '';
         LevelManager.getChapters().forEach((ch, idx) => {
-            const div = document.createElement('div');
-            const startLevel = idx * 10 + 1;
+            const div = document.createElement('div'); const startLevel = idx * 10 + 1;
             const isLocked = startLevel > this.storage.data.currentLevel;
-            
             div.className = `card ${isLocked ? 'locked' : ''}`;
-            div.innerHTML = `
-                <h3>Chapter ${ch.id}</h3>
-                <p class="text-muted">${this.t(ch.nameKey)}</p>
-                <div class="mt-lg">${isLocked ? this.t('locked') : `${ch.count} Levels`}</div>
-            `;
+            div.innerHTML = `<h3>Chapter ${ch.id}</h3><p class="text-muted">${this.t(ch.nameKey)}</p><div class="mt-lg">${isLocked ? this.t('locked') : `${ch.count} Levels`}</div>`;
             if(!isLocked) div.onclick = () => this.renderLevels(ch.id);
             container.appendChild(div);
         });
@@ -531,15 +415,11 @@ class UIManager {
     renderLevels(chapterId) {
         this.showScreen('screen-levels');
         document.getElementById('current-chapter-title').innerText = `Chapter ${chapterId}`;
-        const container = document.getElementById('levels-container');
-        container.innerHTML = '';
-        
+        const container = document.getElementById('levels-container'); container.innerHTML = '';
         const start = (chapterId - 1) * 10 + 1;
         for(let i = start; i < start + 10; i++) {
-            const div = document.createElement('div');
-            const isLocked = i > this.storage.data.currentLevel;
-            div.className = `card ${isLocked ? 'locked' : ''}`;
-            div.innerHTML = `<h4>${i}</h4>`;
+            const div = document.createElement('div'); const isLocked = i > this.storage.data.currentLevel;
+            div.className = `card ${isLocked ? 'locked' : ''}`; div.innerHTML = `<h4>${i}</h4>`;
             if(!isLocked) {
                 const stars = this.storage.data.levels[i]?.stars || 0;
                 if(stars > 0) div.innerHTML += `<div class="stars">${'⭐'.repeat(stars)}</div>`;
@@ -551,13 +431,10 @@ class UIManager {
     
     startGame(levelIndex) {
         if(levelIndex > 60) return; 
-        
         document.getElementById('level-complete-overlay').classList.add('hidden');
         document.getElementById('pause-overlay').classList.add('hidden');
-        
         this.showScreen('screen-game');
         document.getElementById('hud-level-info').innerText = `${this.t('level')} ${levelIndex}`;
-        
         const levelData = LevelManager.generateLevel(levelIndex);
         this.engine.loadLevel(levelData);
         this.audio.playWhisper();
@@ -565,43 +442,28 @@ class UIManager {
     
     handleLevelComplete(moves, time) {
         this.audio.playSuccess();
-        
-        let stars = 3;
-        if (time > this.engine.level.timeLimit) stars = 2;
-        if (time > this.engine.level.timeLimit * 1.5) stars = 1;
-        
-        this.storage.data.stats.solved++;
-        this.storage.data.stats.totalTime += time;
+        let stars = 3; if (time > this.engine.level.timeLimit) stars = 2; if (time > this.engine.level.timeLimit * 1.5) stars = 1;
+        this.storage.data.stats.solved++; this.storage.data.stats.totalTime += time;
         this.storage.data.levels[this.engine.level.id] = { stars, time, moves };
-        
-        if (this.engine.level.id === this.storage.data.currentLevel) {
-            this.storage.data.currentLevel++;
-        }
-        this.storage.save();
-        this.updateTexts();
+        if (this.engine.level.id === this.storage.data.currentLevel) this.storage.data.currentLevel++;
+        this.storage.save(); this.updateTexts();
         
         document.getElementById('stars-container').innerText = '⭐'.repeat(stars);
         document.getElementById('stat-time').innerText = `${this.t('time')}: ${time}s`;
         document.getElementById('stat-moves').innerText = `${this.t('moves')}: ${moves}`;
-        
         document.getElementById('level-complete-overlay').classList.remove('hidden');
     }
 
     renderStats() {
         this.showScreen('screen-stats');
         const st = this.storage.data.stats;
-        document.getElementById('stats-content').innerHTML = `
-            <h3>Scenes Solved: ${st.solved}</h3>
-            <h3>Total Time: ${st.totalTime}s</h3>
-            <h3>Current Level: ${this.storage.data.currentLevel} / 60</h3>
-        `;
+        document.getElementById('stats-content').innerHTML = `<h3>Scenes Solved: ${st.solved}</h3><h3>Total Time: ${st.totalTime}s</h3><h3>Current Level: ${this.storage.data.currentLevel} / 60</h3>`;
     }
 }
 
-// --- Initialization ---
 window.onload = () => {
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('service-worker.js').catch(()=>console.log('SW fallback for local dev'));
+        navigator.serviceWorker.register('service-worker.js').catch(err => console.log('SW setup skipped', err));
     }
     window.gameUI = new UIManager();
 };
