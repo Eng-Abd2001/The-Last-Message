@@ -1,6 +1,7 @@
 /**
  * OUT OF FRAME - Core Game Engine
  * Senior Architecture, Pure Vanilla JS ES6+
+ * (Fully Fixed Version)
  */
 
 // --- I18n (Localization) ---
@@ -92,18 +93,14 @@ class LevelManager {
         ];
     }
     static generateLevel(levelIndex) {
-        // Deterministic generation based on index (1 to 60)
         const chapterIdx = Math.floor((levelIndex - 1) / 10);
         const rule = this.getChapters()[chapterIdx].rule;
-        const size = 6 + Math.floor(levelIndex / 15); // Scales up
+        const size = 6 + Math.floor(levelIndex / 15); 
         
         let entities = [];
-        // Player
         entities.push({ type: 'player', x: 1, y: 1 });
-        // Exit
         entities.push({ type: 'exit', x: size - 2, y: size - 2 });
         
-        // Walls & Quantum Objects based on rule
         for(let i=0; i<size * 1.5; i++) {
             let wx = 2 + (Math.floor(Math.sin(levelIndex * i) * (size-4)) + (size-4)) % (size-3);
             let wy = 2 + (Math.floor(Math.cos(levelIndex * i) * (size-4)) + (size-4)) % (size-3);
@@ -113,7 +110,7 @@ class LevelManager {
             entities.push({
                 type: isQuantum ? 'quantum_wall' : 'wall',
                 x: wx, y: wy,
-                state: 'solid', // solid, hidden
+                state: 'solid',
                 behavior: rule
             });
         }
@@ -128,9 +125,9 @@ class GameEngine {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
         this.ui = uiManager;
-        this.state = 'idle'; // idle, playing, paused, complete
+        this.state = 'idle'; 
         this.level = null;
-        this.camera = { x: 0, y: 0, targetX: 0, targetY: 0, fov: 4 }; // FOV radius
+        this.camera = { x: 0, y: 0, targetX: 0, targetY: 0, fov: 4 }; 
         this.player = { x: 0, y: 0 };
         this.gridSize = 0;
         this.cellSize = 50;
@@ -150,7 +147,7 @@ class GameEngine {
     }
     
     loadLevel(levelData) {
-        this.level = JSON.parse(JSON.stringify(levelData)); // Deep copy
+        this.level = JSON.parse(JSON.stringify(levelData)); 
         this.gridSize = this.level.size;
         
         const p = this.level.entities.find(e => e.type === 'player');
@@ -186,14 +183,12 @@ class GameEngine {
             let cx = e.touches ? e.touches[0].clientX : e.clientX;
             let cy = e.touches ? e.touches[0].clientY : e.clientY;
             
-            // Move camera
             let dx = (lastX - cx) / this.cellSize;
             let dy = (lastY - cy) / this.cellSize;
             
             this.camera.targetX += dx;
             this.camera.targetY += dy;
             
-            // Clamp camera
             this.camera.targetX = Math.max(-2, Math.min(this.gridSize + 1, this.camera.targetX));
             this.camera.targetY = Math.max(-2, Math.min(this.gridSize + 1, this.camera.targetY));
             
@@ -203,7 +198,7 @@ class GameEngine {
         const up = (e) => {
             if(isDragging) { isDragging = false; return; }
             if(this.state !== 'playing') return;
-            // Tap to move player
+            
             let cx = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
             let cy = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
             
@@ -219,19 +214,16 @@ class GameEngine {
     }
     
     attemptMove(screenX, screenY) {
-        // Convert screen to grid
         const offsetX = (this.canvas.width - this.gridSize * this.cellSize) / 2;
         const offsetY = (this.canvas.height - this.gridSize * this.cellSize) / 2;
         
         const gridX = Math.floor((screenX - offsetX + (this.camera.x - this.gridSize/2)*this.cellSize) / this.cellSize + this.gridSize/2);
         const gridY = Math.floor((screenY - offsetY + (this.camera.y - this.gridSize/2)*this.cellSize) / this.cellSize + this.gridSize/2);
         
-        // Simple orthogonal movement check
         let dx = gridX - this.player.x;
         let dy = gridY - this.player.y;
         
         if (Math.abs(dx) + Math.abs(dy) === 1) {
-            // Check collision
             let obstacle = this.level.entities.find(e => e.x === gridX && e.y === gridY && e.type.includes('wall') && e.state === 'solid');
             if(!obstacle) {
                 this.player.x = gridX;
@@ -247,13 +239,11 @@ class GameEngine {
     }
     
     updateVisibility() {
-        // Core Mechanic: Objects change state based on camera distance (Visibility)
         this.level.entities.forEach(e => {
             if (e.type === 'quantum_wall') {
                 const dist = Math.hypot(e.x - this.camera.x, e.y - this.camera.y);
                 const isVisible = dist < this.camera.fov;
                 
-                // Rule logic processing
                 switch(e.behavior) {
                     case 'invisibility': e.state = isVisible ? 'solid' : 'hidden'; break;
                     case 'movement': e.state = isVisible ? 'hidden' : 'solid'; break;
@@ -277,7 +267,6 @@ class GameEngine {
         if(this.state !== 'playing') return;
         requestAnimationFrame(() => this.loop());
         
-        // Lerp camera
         this.camera.x += (this.camera.targetX - this.camera.x) * 0.1;
         this.camera.y += (this.camera.targetY - this.camera.y) * 0.1;
         
@@ -295,7 +284,6 @@ class GameEngine {
         const offsetY = this.canvas.height / 2 - this.camera.y * this.cellSize;
         this.ctx.translate(offsetX, offsetY);
         
-        // Draw Field of View limit (Vignette mapped to world)
         const rad = this.ctx.createRadialGradient(
             this.camera.x * this.cellSize + this.cellSize/2, 
             this.camera.y * this.cellSize + this.cellSize/2, 
@@ -309,9 +297,8 @@ class GameEngine {
         this.ctx.fillStyle = rad;
         this.ctx.fillRect(-offsetX, -offsetY, this.canvas.width, this.canvas.height);
 
-        // Draw Entities
         this.level.entities.forEach(e => {
-            if (e.type === 'player') return; // Draw player last
+            if (e.type === 'player') return; 
             
             this.ctx.beginPath();
             this.ctx.rect(e.x * this.cellSize + 2, e.y * this.cellSize + 2, this.cellSize - 4, this.cellSize - 4);
@@ -327,7 +314,6 @@ class GameEngine {
                     this.ctx.lineWidth = 1;
                     this.ctx.stroke();
                 } else {
-                    // Hidden/Ghost state
                     this.ctx.strokeStyle = 'rgba(46, 89, 107, 0.2)';
                     this.ctx.lineWidth = 1;
                     this.ctx.stroke();
@@ -338,7 +324,6 @@ class GameEngine {
             this.ctx.fill();
         });
         
-        // Draw Player
         this.ctx.beginPath();
         this.ctx.arc(this.player.x * this.cellSize + this.cellSize/2, this.player.y * this.cellSize + this.cellSize/2, this.cellSize/4, 0, Math.PI*2);
         this.ctx.fillStyle = '#4a6b7c';
@@ -385,12 +370,10 @@ class UIManager {
         document.getElementById('btn-settings').innerText = this.t('settings');
         document.getElementById('btn-credits').innerText = this.t('credits');
         
-        // HUD & Overlays
         document.getElementById('btn-lang').innerText = this.lang === 'ar' ? 'العربية' : 'English';
         document.getElementById('btn-sound').innerText = this.storage.data.sound ? this.t('on') : this.t('off');
         document.getElementById('camera-hint').innerText = this.t('cameraHint');
         
-        // Update continues
         const btnContinue = document.getElementById('btn-continue');
         if (this.storage.data.currentLevel > 1) {
             btnContinue.disabled = false;
@@ -403,13 +386,23 @@ class UIManager {
     
     showScreen(id) {
         this.screens.forEach(s => {
-            s.classList.remove('active');
-            setTimeout(() => s.classList.add('hidden'), 500); // Wait for fade
+            if (s.id !== id) {
+                s.classList.remove('active');
+                setTimeout(() => {
+                    if (!s.classList.contains('active')) s.classList.add('hidden');
+                }, 500);
+            }
         });
+        
         const target = document.getElementById(id);
-        target.classList.remove('hidden');
-        setTimeout(() => target.classList.add('active'), 10);
-        this.audio.playClick();
+        if (target) {
+            target.classList.remove('hidden');
+            setTimeout(() => target.classList.add('active'), 10);
+        }
+        
+        if (id !== 'screen-splash' && this.audio) {
+            this.audio.playClick();
+        }
     }
     
     bindEvents() {
@@ -421,9 +414,9 @@ class UIManager {
         document.getElementById('btn-stats').onclick = () => this.renderStats();
         
         document.querySelectorAll('.btn-back').forEach(b => b.onclick = () => this.showScreen('screen-menu'));
-        document.querySelector('.btn-back-chapters').onclick = () => this.showScreen('screen-chapters');
+        const btnBackChapters = document.querySelector('.btn-back-chapters');
+        if(btnBackChapters) btnBackChapters.onclick = () => this.showScreen('screen-chapters');
         
-        // Settings
         document.getElementById('btn-lang').onclick = () => {
             this.lang = this.lang === 'ar' ? 'en' : 'ar';
             this.storage.data.lang = this.lang;
@@ -432,12 +425,14 @@ class UIManager {
             document.documentElement.dir = this.lang === 'ar' ? 'rtl' : 'ltr';
             this.updateTexts();
         };
+        
         document.getElementById('btn-sound').onclick = () => {
             this.storage.data.sound = !this.storage.data.sound;
             this.audio.enabled = this.storage.data.sound;
             this.storage.save();
             this.updateTexts();
         };
+        
         document.getElementById('btn-reset-data').onclick = () => {
             if(confirm('Are you sure? This cannot be undone.')) {
                 this.storage.reset();
@@ -445,36 +440,66 @@ class UIManager {
             }
         };
 
-        // Game HUD
         document.getElementById('btn-pause').onclick = () => {
             this.engine.state = 'paused';
             document.getElementById('pause-overlay').classList.remove('hidden');
         };
+        
         document.getElementById('btn-resume').onclick = () => {
             document.getElementById('pause-overlay').classList.add('hidden');
             this.engine.state = 'playing';
         };
+        
+        const btnSettingsIngame = document.getElementById('btn-settings-ingame');
+        if(btnSettingsIngame) {
+            btnSettingsIngame.onclick = () => {
+                document.getElementById('pause-overlay').classList.add('hidden');
+                this.showScreen('screen-settings');
+            };
+        }
+        
         document.getElementById('btn-quit').onclick = () => {
             document.getElementById('pause-overlay').classList.add('hidden');
             this.showScreen('screen-menu');
         };
+        
         document.getElementById('btn-restart').onclick = () => {
             this.startGame(this.engine.level.id);
         };
         
-        // Level Complete
+        // Hint System Events
+        let currentHint = 1;
+        document.getElementById('btn-hint').onclick = () => {
+            document.getElementById('hint-overlay').classList.remove('hidden');
+            document.getElementById('hint-text').innerText = this.t('hint1');
+            currentHint = 1;
+        };
+        
+        document.getElementById('btn-close-hint').onclick = () => {
+            document.getElementById('hint-overlay').classList.add('hidden');
+        };
+        
+        document.getElementById('btn-next-hint').onclick = () => {
+            currentHint = currentHint >= 3 ? 1 : currentHint + 1;
+            document.getElementById('hint-text').innerText = this.t('hint' + currentHint);
+        };
+
+        // Complete Level Events
         document.getElementById('btn-next-level').onclick = () => {
             document.getElementById('level-complete-overlay').classList.add('hidden');
             this.startGame(this.engine.level.id + 1);
         };
+        
         document.getElementById('btn-menu-complete').onclick = () => {
             document.getElementById('level-complete-overlay').classList.add('hidden');
             this.showScreen('screen-menu');
         };
+        
         document.getElementById('btn-replay-level').onclick = () => {
             document.getElementById('level-complete-overlay').classList.add('hidden');
             this.startGame(this.engine.level.id);
         };
+        
         document.getElementById('btn-share').onclick = () => {
             const text = `OUT OF FRAME\nScene ${this.engine.level.id} Solved!\n⭐⭐⭐\nTime: ${this.engine.elapsed}s`;
             if (navigator.share) navigator.share({ text });
@@ -525,7 +550,7 @@ class UIManager {
     }
     
     startGame(levelIndex) {
-        if(levelIndex > 60) return; // End of game
+        if(levelIndex > 60) return; 
         
         document.getElementById('level-complete-overlay').classList.add('hidden');
         document.getElementById('pause-overlay').classList.add('hidden');
@@ -541,12 +566,10 @@ class UIManager {
     handleLevelComplete(moves, time) {
         this.audio.playSuccess();
         
-        // Calculate Stars
         let stars = 3;
         if (time > this.engine.level.timeLimit) stars = 2;
         if (time > this.engine.level.timeLimit * 1.5) stars = 1;
         
-        // Save Progress
         this.storage.data.stats.solved++;
         this.storage.data.stats.totalTime += time;
         this.storage.data.levels[this.engine.level.id] = { stars, time, moves };
@@ -557,7 +580,6 @@ class UIManager {
         this.storage.save();
         this.updateTexts();
         
-        // Show UI
         document.getElementById('stars-container').innerText = '⭐'.repeat(stars);
         document.getElementById('stat-time').innerText = `${this.t('time')}: ${time}s`;
         document.getElementById('stat-moves').innerText = `${this.t('moves')}: ${moves}`;
@@ -578,9 +600,8 @@ class UIManager {
 
 // --- Initialization ---
 window.onload = () => {
-    // Register Service Worker for PWA Offline support
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('service-worker.js').catch(()=>console.log('SW setup skipped for static file run'));
+        navigator.serviceWorker.register('service-worker.js').catch(()=>console.log('SW fallback for local dev'));
     }
     window.gameUI = new UIManager();
 };
