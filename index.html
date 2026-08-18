@@ -2,211 +2,170 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>المحامي الأخير</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OUT OF FRAME | خارج المشهد</title>
+    <meta name="description" content="ما لا تراه... قد يتغير. لعبة ألغاز سينمائية نفسية.">
+    <meta name="theme-color" content="#050505">
+    <meta property="og:title" content="OUT OF FRAME | خارج المشهد">
+    <meta property="og:description" content="ما لا تراه... قد يتغير. العب الآن.">
+    <link rel="manifest" href="manifest.webmanifest">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="mobile-app">
-        <!-- Pattern Overlay -->
-        <div class="bg-pattern"></div>
+    <div id="vignette"></div>
+    <div id="film-grain"></div>
 
-        <!-- Fixed Sound Toggle (Top Left - Safe Zone) -->
-        <button id="sound-toggle" aria-label="تبديل الصوت">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-            </svg>
-        </button>
+    <!-- Splash Screen -->
+    <div id="screen-splash" class="screen active cinematic-fade">
+        <h1 class="title-main">OUT OF FRAME</h1>
+        <h2 class="title-sub">خارج المشهد</h2>
+        <p class="tagline">ما لا تراه... قد يتغير.</p>
+        <button id="btn-start" class="btn primary mt-lg">ابدأ | START</button>
+    </div>
 
-        <!-- UI Overlays -->
-        <div id="toast-container"></div>
-        <div id="achievement-container"></div>
+    <!-- Main Menu -->
+    <div id="screen-menu" class="screen hidden cinematic-fade">
+        <h1 class="title-main small">OUT OF FRAME</h1>
+        <div class="menu-list">
+            <button id="btn-continue" class="btn" disabled>متابعة | Continue</button>
+            <button id="btn-chapters" class="btn">الفصول | Chapters</button>
+            <button id="btn-daily" class="btn">لغز اليوم | Daily Mystery</button>
+            <button id="btn-endless" class="btn">لا نهائي | Endless</button>
+            <button id="btn-stats" class="btn">الإحصائيات | Stats</button>
+            <button id="btn-achievements" class="btn">الإنجازات | Achievements</button>
+            <button id="btn-settings" class="btn">الإعدادات | Settings</button>
+            <button id="btn-credits" class="btn">الحقوق | Credits</button>
+        </div>
+    </div>
 
-        <!-- Modal -->
-        <div id="file-modal" class="modal">
-            <div class="modal-content">
-                <button class="close-btn" onclick="closeModal('file-modal')">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-                <div class="modal-header-visual">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                </div>
-                <h2 id="modal-case-title">عنوان القضية</h2>
-                <div class="modal-body" id="modal-case-body"></div>
+    <!-- Chapters Screen -->
+    <div id="screen-chapters" class="screen hidden cinematic-fade">
+        <div class="header">
+            <button class="btn-icon btn-back">⟵</button>
+            <h2 id="txt-chapters-title">الفصول</h2>
+        </div>
+        <div id="chapters-container" class="grid-container"></div>
+    </div>
+
+    <!-- Levels Screen -->
+    <div id="screen-levels" class="screen hidden cinematic-fade">
+        <div class="header">
+            <button class="btn-icon btn-back-chapters">⟵</button>
+            <h2 id="current-chapter-title">Chapter 1</h2>
+        </div>
+        <div id="levels-container" class="grid-container levels-grid"></div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="screen-game" class="screen hidden">
+        <canvas id="game-canvas"></canvas>
+        
+        <div id="game-hud">
+            <div class="hud-top">
+                <button id="btn-pause" class="btn-icon">⏸</button>
+                <div id="hud-level-info">Level 1</div>
+                <button id="btn-hint" class="btn-icon">💡</button>
+            </div>
+            <div class="hud-bottom">
+                <button id="btn-undo" class="btn-icon">↺</button>
+                <div id="camera-hint" class="hud-message">اسحب لتحريك الكاميرا</div>
+                <button id="btn-restart" class="btn-icon">↻</button>
             </div>
         </div>
 
-        <!-- Screen 1: Start Screen -->
-        <div id="start-screen" class="screen active">
-            <div class="center-content safe-top">
-                <div class="logo-visual">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2v20"></path><path d="M3 7h18"></path>
-                        <path d="M6 7l-3 7c0 1.5 1.5 3 3 3s3-1.5 3-3l-3-7z"></path>
-                        <path d="M18 7l-3 7c0 1.5 1.5 3 3 3s3-1.5 3-3l-3-7z"></path>
-                        <path d="M9 22h6"></path>
-                    </svg>
-                </div>
-                <div class="logo-container">
-                    <h1>المحامي الأخير</h1>
-                    <p class="subtitle">THE LAST ARGUMENT</p>
-                </div>
-                <div class="separator-line"></div>
-                <p class="cinematic-desc">في أروقة هذه المحكمة، الحقيقة لا تُمنح... بل تُنتزع. جهّز أدلتك، فلا مجال للخطأ هنا.</p>
-                <div class="action-buttons">
-                    <button class="gold-btn full-width" onclick="startGame()">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                        <span>دخول المحكمة</span>
-                    </button>
-                    <button class="outline-btn full-width mt-15" onclick="showScreen('stats-screen')">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
-                        <span>السجل الجنائي والإحصائيات</span>
-                    </button>
+        <div id="hint-overlay" class="overlay hidden cinematic-fade">
+            <div class="modal">
+                <h3>تلميح</h3>
+                <p id="hint-text"></p>
+                <div class="modal-actions">
+                    <button id="btn-next-hint" class="btn secondary">التلميح التالي</button>
+                    <button id="btn-close-hint" class="btn">إغلاق</button>
                 </div>
             </div>
         </div>
 
-        <!-- Screen 2: Stats & Progress -->
-        <div id="stats-screen" class="screen">
-            <div class="screen-header">
-                <div class="header-group">
-                    <button class="icon-only-btn outline-icon" onclick="showScreen('start-screen')">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                    </button>
-                    <h2>السجل المهني</h2>
-                </div>
-            </div>
-            <div class="scrollable-content">
-                <div class="stats-grid" id="stats-grid"></div>
-                <div class="separator-line mb-20"></div>
-                <h3 class="section-title">الأوسمة الفخرية</h3>
-                <div class="achievements-list" id="achievements-list"></div>
-            </div>
-            <div class="bottom-action">
-                <button class="gold-btn full-width" id="share-btn" onclick="shareStats()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                    <span>مشاركة السجل</span>
-                </button>
+        <div id="pause-overlay" class="overlay hidden cinematic-fade">
+            <div class="modal">
+                <h3>إيقاف مؤقت</h3>
+                <button id="btn-resume" class="btn primary">متابعة</button>
+                <button id="btn-settings-ingame" class="btn secondary">الإعدادات</button>
+                <button id="btn-quit" class="btn danger">خروج</button>
             </div>
         </div>
 
-        <!-- Screen 3: Cases List -->
-        <div id="cases-screen" class="screen">
-            <div class="screen-header">
-                <div class="header-group">
-                    <button class="icon-only-btn outline-icon" onclick="showScreen('start-screen')">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                    </button>
-                    <h2>ملفات التحقيق</h2>
+        <div id="level-complete-overlay" class="overlay hidden cinematic-fade">
+            <div class="modal">
+                <h3 id="txt-complete-title">اكتمل المشهد</h3>
+                <div id="stars-container" class="stars">⭐⭐⭐</div>
+                <div class="stats-row">
+                    <span id="stat-time">الوقت: 00:00</span>
+                    <span id="stat-moves">الحركات: 0</span>
                 </div>
-            </div>
-            <div class="scrollable-content cases-container" id="cases-container"></div>
-        </div>
-
-        <!-- Screen 4: Investigation Phase -->
-        <div id="investigation-screen" class="screen">
-            <div class="screen-header">
-                <div class="header-group">
-                    <button class="icon-only-btn outline-icon" onclick="showScreen('cases-screen')">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                    </button>
-                    <h2 id="inv-case-title" class="truncate">القضية</h2>
+                <div class="modal-actions mt-lg">
+                    <button id="btn-next-level" class="btn primary">التالي</button>
+                    <button id="btn-replay-level" class="btn secondary">إعادة</button>
+                    <button id="btn-share" class="btn secondary">مشاركة</button>
+                    <button id="btn-menu-complete" class="btn">القائمة</button>
                 </div>
-                <button class="outline-btn small-btn" onclick="openFileModal()" style="padding: 6px 10px;">الملف</button>
-            </div>
-            
-            <div class="investigation-wrapper">
-                <div class="investigation-hint">امسح مسرح الجريمة بحثاً عن الأدلة (اضغط على الأرقام)</div>
-                <div class="investigation-area-container">
-                    <div class="investigation-area" id="investigation-area"></div>
-                </div>
-            </div>
-
-            <div class="bottom-panel">
-                <div class="panel-header">
-                    <h3>حقيبة الأدلة الجنائية (<span id="ev-count" class="gold-text">0</span>)</h3>
-                </div>
-                <div class="evidence-tray" id="evidence-tray"></div>
-                <button class="gold-btn full-width hidden mt-10 glow-btn" id="to-court-btn" onclick="goToCourt()">
-                    <span>بدء المحاكمة ⚖️</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- Screen 5: Courtroom Phase -->
-        <div id="court-screen" class="screen">
-            <div class="court-top">
-                <div class="judge-confidence">
-                    <span>ثقة هيئة المحلفين</span>
-                    <div class="confidence-bar"><div class="fill" id="confidence-fill"></div></div>
-                </div>
-                <div class="attempts-left">اعتراضات متبقية: <span id="court-attempts">3</span></div>
-            </div>
-
-            <div class="court-stage">
-                <div class="character-box judge">
-                    <div class="avatar-img">
-                        <!-- Professional Gavel SVG -->
-                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M14 14L9 19l-4-4 5-5"></path>
-                            <path d="M16 6l2 2-4 4-2-2 4-4z"></path>
-                            <path d="M17 7l3-3a1.4 1.4 0 0 0-2-2l-3 3"></path>
-                            <path d="M4 22h16"></path>
-                        </svg>
-                    </div>
-                    <div class="name">سيادة القاضي</div>
-                </div>
-                <div class="character-box witness">
-                    <div class="avatar-img witness-color">
-                        <!-- Professional Silhouette SVG -->
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                    </div>
-                    <div class="name" id="witness-name">الشاهد / الخصم</div>
-                </div>
-            </div>
-
-            <div class="scrollable-content court-chat" id="dialogue-box"></div>
-
-            <div class="court-actions-panel">
-                <div id="court-present-action" class="hidden">
-                    <h3 class="mb-10 text-center gold-text text-spacing">قدم دليلاً يدحض هذا الإدعاء</h3>
-                    <div class="court-evidence-chips" id="court-evidence-tray"></div>
-                </div>
-                <!-- Manual progression button -->
-                <button class="outline-btn full-width mt-10" id="next-dialogue-btn"></button>
-            </div>
-        </div>
-
-        <!-- Screen 6: Final Argument -->
-        <div id="final-argument-screen" class="screen">
-            <div class="center-content">
-                <div class="logo-visual alert-visual">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                </div>
-                <h2 class="alert-text pulse-anim text-spacing mt-10">المرافعة الختامية!</h2>
-                <div class="separator-line my-15"></div>
-                <p class="final-desc">لديك <span id="final-timer" class="gold-text">30</span> ثانية فقط لتقديم استنتاجك النهائي أمام المحكمة.</p>
-                <div class="argument-options mt-15" id="argument-options"></div>
-            </div>
-        </div>
-
-        <!-- Screen 7: Result Screen -->
-        <div id="result-screen" class="screen">
-            <div class="center-content">
-                <div id="result-icon-container" class="logo-visual"></div>
-                <h1 id="result-title" class="text-spacing mt-10">نطق الحكم</h1>
-                <p id="result-desc" class="mt-15 mb-20"></p>
-                <div class="result-stats" id="result-stats-details"></div>
-                <button class="gold-btn full-width mt-20 glow-btn" onclick="showScreen('cases-screen')">
-                    <span>العودة للأرشيف الجنائي</span>
-                </button>
             </div>
         </div>
     </div>
+
+    <!-- Settings Screen -->
+    <div id="screen-settings" class="screen hidden cinematic-fade">
+        <div class="header">
+            <button class="btn-icon btn-back">⟵</button>
+            <h2>الإعدادات</h2>
+        </div>
+        <div class="settings-list">
+            <div class="setting-item">
+                <span>اللغة | Language</span>
+                <button id="btn-lang" class="btn secondary">العربية</button>
+            </div>
+            <div class="setting-item">
+                <span>المؤثرات الصوتية</span>
+                <button id="btn-sound" class="btn secondary">مفعل</button>
+            </div>
+            <div class="setting-item">
+                <span>حركة الكاميرا</span>
+                <button id="btn-motion" class="btn secondary">عالي</button>
+            </div>
+            <div class="setting-item mt-lg">
+                <button id="btn-reset-data" class="btn danger">حذف التقدم</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats & Achievements, Credits (Reusing generic containers) -->
+    <div id="screen-stats" class="screen hidden cinematic-fade">
+        <div class="header">
+            <button class="btn-icon btn-back">⟵</button>
+            <h2>الإحصائيات</h2>
+        </div>
+        <div id="stats-content" class="content-box"></div>
+    </div>
+
+    <div id="screen-achievements" class="screen hidden cinematic-fade">
+        <div class="header">
+            <button class="btn-icon btn-back">⟵</button>
+            <h2>الإنجازات</h2>
+        </div>
+        <div id="achievements-content" class="grid-container"></div>
+    </div>
+
+    <div id="screen-credits" class="screen hidden cinematic-fade">
+        <div class="header">
+            <button class="btn-icon btn-back">⟵</button>
+            <h2>الحقوق</h2>
+        </div>
+        <div class="content-box text-center">
+            <h3>OUT OF FRAME</h3>
+            <p>Original Web Puzzle Game</p>
+            <p>Built with HTML5, CSS3, JavaScript</p>
+            <p class="mt-lg text-muted">جميع الحقوق محفوظة &copy; 2024</p>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>

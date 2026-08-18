@@ -1,0 +1,17 @@
+{
+  "name": "OUT OF FRAME",
+  "short_name": "OutOfFrame",
+  "description": "ما لا تراه... قد يتغير. لعبة ألغاز نفسية.",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "background_color": "#050507",
+  "theme_color": "#050507",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23050507'/%3E%3Ccircle cx='256' cy='256' r='100' stroke='%232e596b' stroke-width='10' fill='none'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
