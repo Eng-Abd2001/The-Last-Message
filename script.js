@@ -213,3 +213,20 @@ console.log(
 console.log(
     "Core dashboard initialized successfully."
 );
+
+
+async function loadOpportunities() {
+    try {
+        const response = await fetch("/api/opportunities");
+        const data = await response.json();
+
+        if (!data.success) return;
+
+        console.log("الفرص المكتشفة:", data.opportunities);
+
+    } catch (error) {
+        console.error("فشل تحميل الفرص:", error);
+    }
+}
+
+loadOpportunities();
