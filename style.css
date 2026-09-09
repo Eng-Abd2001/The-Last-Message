@@ -710,3 +710,37 @@ footer {
         font-size: 20px;
     }
 }
+
+
+
+
+
+.opportunities-list {
+    display: grid;
+    gap: 12px;
+}
+
+.opportunity-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.opportunity-card h3 {
+    font-size: 15px;
+    margin-bottom: 8px;
+}
+
+.opportunity-card p {
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 2;
+}
+
+.opportunity-score {
+    margin-top: 14px;
+    color: var(--success);
+    font-size: 13px;
+    font-weight: 700;
+}

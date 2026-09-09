@@ -230,3 +230,34 @@ async function loadOpportunities() {
 }
 
 loadOpportunities();
+
+
+
+
+
+
+async function displayOpportunities() {
+    try {
+        const response = await fetch("/api/opportunities");
+        const data = await response.json();
+
+        const container = document.getElementById("opportunitiesList");
+
+        if (!container || !data.success) return;
+
+        container.innerHTML = data.opportunities.map(opportunity => `
+            <div class="opportunity-card">
+                <h3>${opportunity.title}</h3>
+                <p>${opportunity.problem}</p>
+                <div class="opportunity-score">
+                    تقييم الفرصة: ${opportunity.score}/100
+                </div>
+            </div>
+        `).join("");
+
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+displayOpportunities();
