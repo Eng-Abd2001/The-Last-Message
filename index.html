@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b0f14">
+    <meta name="description" content="Money Hunter AI - لوحة التحكم">
+    <title>Money Hunter AI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">M</div>
+            <div>
+                <strong>Money Hunter</strong>
+                <span>AI SYSTEM</span>
+            </div>
+        </div>
+
+        <nav>
+            <button class="nav-item active" data-section="dashboard">
+                <span>⌂</span>
+                لوحة التحكم
+            </button>
+
+            <button class="nav-item" data-section="opportunities">
+                <span>◈</span>
+                الفرص
+            </button>
+
+            <button class="nav-item" data-section="projects">
+                <span>▣</span>
+                المشاريع
+            </button>
+
+            <button class="nav-item" data-section="activity">
+                <span>◷</span>
+                النشاط
+            </button>
+        </nav>
+
+        <div class="system-status">
+            <div class="status-dot"></div>
+            <div>
+                <strong>النظام يعمل</strong>
+                <span>جاهز للمرحلة التالية</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">AUTONOMOUS BUSINESS SYSTEM</p>
+                <h1 id="page-title">لوحة التحكم</h1>
+            </div>
+
+            <div class="top-actions">
+                <button class="icon-btn" id="refreshBtn" title="تحديث">↻</button>
+                <div class="avatar">MH</div>
+            </div>
+        </header>
+
+        <!-- Dashboard -->
+        <section class="section active" id="dashboard">
+
+            <div class="hero">
+                <div>
+                    <span class="badge">V1 • CORE SYSTEM</span>
+                    <h2>صياد الفرص الرقمية</h2>
+                    <p>
+                        النظام الأساسي جاهز لاستقبال محرك البحث والتحليل
+                        في المرحلة القادمة.
+                    </p>
+                </div>
+
+                <div class="hero-mark">AI</div>
+            </div>
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+                    <span>الفرص المكتشفة</span>
+                    <strong id="opportunitiesCount">0</strong>
+                    <small>بانتظار تشغيل الباحث</small>
+                </div>
+
+                <div class="stat-card">
+                    <span>أفضل فرصة</span>
+                    <strong id="bestScore">—</strong>
+                    <small>لا توجد بيانات بعد</small>
+                </div>
+
+                <div class="stat-card">
+                    <span>المشاريع</span>
+                    <strong id="projectsCount">0</strong>
+                    <small>لم يتم إنشاء مشاريع</small>
+                </div>
+
+                <div class="stat-card">
+                    <span>حالة النظام</span>
+                    <strong class="online">ONLINE</strong>
+                    <small>جميع الوحدات الأساسية تعمل</small>
+                </div>
+
+            </div>
+
+            <div class="dashboard-grid">
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <span class="panel-label">NEXT MODULE</span>
+                            <h3>محرك اكتشاف الفرص</h3>
+                        </div>
+                        <span class="module-number">02</span>
+                    </div>
+
+                    <p class="panel-description">
+                        سيبحث النظام تلقائيًا عن مشاكل واحتياجات حقيقية
+                        يمكن تحويلها إلى مشاريع رقمية قابلة للنمو.
+                    </p>
+
+                    <div class="progress">
+                        <div class="progress-bar"></div>
+                    </div>
+
+                    <div class="module-footer">
+                        <span>الحالة: قيد التطوير</span>
+                        <button class="primary-btn" id="startSearchBtn">
+                            تشغيل لاحقًا
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <span class="panel-label">SYSTEM FLOW</span>
+                            <h3>دورة العمل</h3>
+                        </div>
+                    </div>
+
+                    <div class="flow">
+                        <div class="flow-step active-flow">
+                            <span>01</span>
+                            <strong>البحث</strong>
+                        </div>
+
+                        <div class="flow-line"></div>
+
+                        <div class="flow-step">
+                            <span>02</span>
+                            <strong>التحليل</strong>
+                        </div>
+
+                        <div class="flow-line"></div>
+
+                        <div class="flow-step">
+                            <span>03</span>
+                            <strong>البناء</strong>
+                        </div>
+
+                        <div class="flow-line"></div>
+
+                        <div class="flow-step">
+                            <span>04</span>
+                            <strong>النشر</strong>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel recent-panel">
+                <div class="panel-header">
+                    <div>
+                        <span class="panel-label">ACTIVITY</span>
+                        <h3>آخر النشاطات</h3>
+                    </div>
+                    <button class="text-btn" data-section-target="activity">
+                        عرض الكل
+                    </button>
+                </div>
+
+                <div class="empty-state">
+                    <div class="empty-icon">◌</div>
+                    <strong>لا توجد نشاطات بعد</strong>
+                    <span>سيظهر النشاط هنا عند تشغيل الوكلاء.</span>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Opportunities -->
+        <section class="section" id="opportunities">
+
+            <div class="section-heading">
+                <div>
+                    <span class="panel-label">OPPORTUNITY ENGINE</span>
+                    <h2>الفرص</h2>
+                    <p>هنا ستظهر الفرص التي يكتشفها الذكاء الاصطناعي.</p>
+                </div>
+            </div>
+
+            <div class="empty-page">
+                <div class="big-icon">◈</div>
+                <h3>محرك الفرص غير متصل بعد</h3>
+                <p>
+                    هذه الواجهة جاهزة. في المرحلة الثانية سنضيف
+                    محرك البحث والتحليل.
+                </p>
+                <span class="coming">MODULE 02</span>
+            </div>
+
+        </section>
+
+        <!-- Projects -->
+        <section class="section" id="projects">
+
+            <div class="section-heading">
+                <div>
+                    <span class="panel-label">PROJECT FACTORY</span>
+                    <h2>المشاريع</h2>
+                    <p>المشاريع التي سيبنيها النظام لاحقًا.</p>
+                </div>
+            </div>
+
+            <div class="empty-page">
+                <div class="big-icon">▣</div>
+                <h3>لا توجد مشاريع</h3>
+                <p>
+                    سيتم إنشاء أول مشروع بعد تشغيل محرك اكتشاف الفرص
+                    وبناء النظام.
+                </p>
+                <span class="coming">MODULE 03</span>
+            </div>
+
+        </section>
+
+        <!-- Activity -->
+        <section class="section" id="activity">
+
+            <div class="section-heading">
+                <div>
+                    <span class="panel-label">SYSTEM LOG</span>
+                    <h2>النشاط</h2>
+                    <p>سجل عمليات النظام والوكلاء.</p>
+                </div>
+            </div>
+
+            <div class="activity-list">
+
+                <div class="activity-item">
+                    <div class="activity-icon">✓</div>
+                    <div>
+                        <strong>تم تشغيل النظام الأساسي</strong>
+                        <span>الآن</span>
+                    </div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="activity-icon">01</div>
+                    <div>
+                        <strong>واجهة لوحة التحكم جاهزة</strong>
+                        <span>المرحلة 1</span>
+                    </div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="activity-icon">02</div>
+                    <div>
+                        <strong>محرك اكتشاف الفرص</strong>
+                        <span>بانتظار التطوير</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <footer>
+            <span>Money Hunter AI</span>
+            <span>Core System V1.0</span>
+        </footer>
+
+    </main>
+</div>
+
+<div class="toast" id="toast">
+    <span>✓</span>
+    <p id="toastText">تم التحديث</p>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
