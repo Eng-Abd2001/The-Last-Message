@@ -236,6 +236,8 @@ loadOpportunities();
 
 
 
+
+
 async function displayOpportunities() {
     try {
         const response = await fetch("/api/opportunities");
@@ -245,19 +247,63 @@ async function displayOpportunities() {
 
         if (!container || !data.success) return;
 
-        container.innerHTML = data.opportunities.map(opportunity => `
+        container.innerHTML = data.opportunities.map((opportunity, index) => `
             <div class="opportunity-card">
                 <h3>${opportunity.title}</h3>
+
                 <p>${opportunity.problem}</p>
+
                 <div class="opportunity-score">
                     تقييم الفرصة: ${opportunity.score}/100
                 </div>
+
+                <button
+                    class="analyze-btn"
+                    onclick="analyzeOpportunity(${index})">
+                    تحليل الفرصة
+                </button>
+
+                <div id="analysis-${index}" class="analysis-result"></div>
             </div>
         `).join("");
 
+        window.currentOpportunities = data.opportunities;
+
     } catch (error) {
-        console.error(error);
+        console.error("فشل تحميل الفرص:", error);
     }
+}
+
+async function analyzeOpportunity(index) {
+    const opportunity = window.currentOpportunities[index];
+    const result = document.getElementById(`analysis-${index}`);
+
+    if (!opportunity || !result) return;
+
+    result.innerHTML = "⏳ جاري تحليل الفرصة...";
+
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    let decision = "متوسطة";
+    let reason = "تحتاج إلى دراسة إضافية قبل التنفيذ.";
+
+    if (opportunity.score >= 80) {
+        decision = "قوية";
+        reason = "يوجد اهتمام واضح بالمشكلة، ويمكن تحويلها إلى أداة رقمية بسيطة.";
+    } else if (opportunity.score >= 70) {
+        decision = "جيدة";
+        reason = "الفرصة تستحق التجربة، لكن يجب اختبار الطلب قبل استثمار وقت كبير.";
+    } else {
+        decision = "ضعيفة";
+        reason = "الإشارات الحالية لا تكفي لإعطائها أولوية عالية.";
+    }
+
+    result.innerHTML = `
+        <div class="analysis-box">
+            <strong>القرار: ${decision}</strong>
+            <p>${reason}</p>
+        </div>
+    `;
 }
 
 displayOpportunities();

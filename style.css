@@ -744,3 +744,46 @@ footer {
     font-size: 13px;
     font-weight: 700;
 }
+
+
+
+
+
+
+
+
+
+.analyze-btn {
+    margin-top: 15px;
+    padding: 10px 16px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+}
+
+.analyze-btn:hover {
+    opacity: 0.9;
+}
+
+.analysis-result {
+    margin-top: 12px;
+}
+
+.analysis-box {
+    padding: 14px;
+    border-radius: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.analysis-box strong {
+    font-size: 13px;
+}
+
+.analysis-box p {
+    margin-top: 6px;
+}
